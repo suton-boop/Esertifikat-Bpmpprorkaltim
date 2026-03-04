@@ -36,6 +36,15 @@
         <i class="fa-solid fa-paper-plane me-1"></i> Ajukan Semua Draft
       </button>
     </form>
+
+    {{-- Generate PDF Semua --}}
+    <form method="POST" action="{{ route('admin.certificates.generatePdfAll') }}">
+      @csrf
+      <input type="hidden" name="event_id" value="{{ $eventId }}">
+      <button class="btn border-success text-success bg-success bg-opacity-10 rounded-3 shadow-sm hover:!bg-success hover:!text-white transition-colors" {{ $eventId ? '' : 'disabled' }}>
+        <i class="fa-solid fa-file-pdf me-1"></i> Generate PDF Semua Berstatus (Approved)
+      </button>
+    </form>
   </div>
 </div>
 

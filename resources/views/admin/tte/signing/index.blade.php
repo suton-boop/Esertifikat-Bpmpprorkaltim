@@ -3,217 +3,335 @@
 @section('title','Signing Queue')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-start mb-3">
+<div class="d-flex justify-content-between align-items-center mb-4">
   <div>
-    <h4 class="mb-0">Signing Queue</h4>
-    <div class="text-muted">Daftar sertifikat status <b>APPROVED</b> / <b>FINAL_GENERATED</b> yang siap ditandatangani.</div>
+    <h4 class="mb-0 fw-bold">Signing Queue</h4>
+    <div class="text-muted">Daftar sertifikat status <b>FINAL_GENERATED</b> yang siap untuk dibubuhi Tanda Tangan Elektronik.</div>
   </div>
 </div>
 
 @if(session('success'))
-  <div class="alert alert-success">{{ session('success') }}</div>
+  <div class="alert alert-success alert-dismissible fade show" role="alert">
+    {{ session('success') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
 @endif
 @if(session('error'))
-  <div class="alert alert-danger">{{ session('error') }}</div>
+  <div class="alert alert-danger alert-dismissible fade show" role="alert">
+    {{ session('error') }}
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
+@endif
+@if($errors->any())
+  <div class="alert alert-warning alert-dismissible fade show shadow-sm" role="alert">
+    <div class="fw-bold mb-1"><i class="fa-solid fa-triangle-exclamation me-1"></i> Validasi Gagal:</div>
+    <ul class="mb-0 small">
+      @foreach($errors->all() as $error)
+         <li>{{ $error }}</li>
+      @endforeach
+    </ul>
+    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+  </div>
 @endif
 
-{{-- Filter --}}
-<form class="card p-3 mb-3" method="GET" action="{{ route('admin.tte.signing.index') }}">
-  <div class="row g-3 align-items-end">
-    <div class="col-md-6">
-      <label class="form-label">Cari</label>
-      <input type="text" class="form-control" name="q" value="{{ $q ?? '' }}" placeholder="Cari no sertifikat / nama peserta...">
-    </div>
-    <div class="col-md-4">
-      <label class="form-label">Event</label>
-      <select name="event_id" class="form-select">
-        <option value="">-- Semua Event --</option>
-        @foreach(($events ?? collect()) as $e)
-          <option value="{{ $e->id }}" @selected(($eventId ?? null) == $e->id)>{{ $e->name }}</option>
-        @endforeach
-      </select>
-    </div>
-    <div class="col-md-2 text-end">
-      <button class="btn btn-primary">Cari</button>
-      <a href="{{ route('admin.tte.signing.index') }}" class="btn btn-outline-secondary">Reset</a>
-    </div>
+{{-- FILTER CARD --}}
+<div class="card border-0 shadow-sm rounded-4 mb-4">
+  <div class="card-body">
+    <form method="GET" action="{{ route('admin.tte.signing.index') }}" class="row g-3 align-items-end">
+      <div class="col-md-5">
+        <label class="form-label small text-muted mb-1">Pencarian</label>
+        <input type="text" class="form-control" name="q" value="{{ $q ?? '' }}" placeholder="Cari No. sertifikat atau nama peserta...">
+      </div>
+      <div class="col-md-5">
+        <label class="form-label small text-muted mb-1">Filter Event</label>
+        <select name="event_id" class="form-select">
+          <option value="">-- Semua Event --</option>
+          @foreach(($events ?? collect()) as $e)
+            <option value="{{ $e->id }}" @selected(($eventId ?? null) == $e->id)>{{ $e->name }}</option>
+          @endforeach
+        </select>
+      </div>
+      <div class="col-md-2 d-flex gap-2">
+        <button class="btn btn-primary w-100"><i class="fa-solid fa-magnifying-glass"></i> Cari</button>
+        <a href="{{ route('admin.tte.signing.index') }}" class="btn btn-outline-secondary" title="Reset filter"><i class="fa-solid fa-rotate-left"></i></a>
+      </div>
+    </form>
   </div>
-</form>
+</div>
 
-{{-- Dispatch panel (Bulk) --}}
-<form method="POST" action="{{ route('admin.tte.signing.dispatchBulk') }}" class="card p-3 mb-3">
-  @csrf
-
-  <div class="row g-3 align-items-end">
-    <div class="col-md-6">
-      <label class="form-label">Signer untuk dispatch</label>
-     <select name="signer_cert_code" class="form-select" required>
-      <option value="">Pilih signer...</option>
-      @foreach(($signers ?? collect()) as $s)
-        <option value="{{ $s->code }}">{{ $s->name }} ({{ $s->code }})</option>
-      @endforeach
-    </select>
-      @error('signer_certificate_id')
-        <div class="text-danger small mt-1">{{ $message }}</div>
-      @enderror
-    </div>
-
-    <div class="col-md-6">
-      <label class="form-label">Visibility</label>
-      <div class="d-flex gap-4">
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" name="barcode_visible" value="1" id="barcode_visible" checked>
-          <label class="form-check-label" for="barcode_visible">Tampilkan Barcode</label>
-        </div>
-        <div class="form-check">
-          <input class="form-check-input" type="checkbox" name="tte_visible" value="1" id="tte_visible" checked>
-          <label class="form-check-label" for="tte_visible">Tampilkan TTE</label>
-        </div>
+{{-- KONFIGURASI SIGNER & TTE CARD --}}
+<div class="card border-primary border-opacity-25 shadow-sm rounded-4 mb-4">
+  <div class="card-header bg-primary bg-opacity-10 border-bottom border-primary border-opacity-25 p-3">
+    <h6 class="mb-0 fw-bold text-primary"><i class="fa-solid fa-pen-nib me-2"></i>Konfigurasi Penanda Tangan (Signer)</h6>
+  </div>
+  <div class="card-body">
+    <div class="row g-4 align-items-center">
+      <div class="col-md-5">
+        <label class="form-label small text-muted fw-bold mb-1">Pilih Signer (Penandatangan) <span class="text-danger">*</span></label>
+        <select id="globalSignerSelect" class="form-select border-primary shadow-sm" required>
+          <option value="">-- Wajib Pilih Signer --</option>
+          @foreach(($signers ?? collect()) as $s)
+            @php
+              // Set Dr. Jarwoko sebagai default selected
+              $isJarwoko = str_contains(strtolower($s->name), 'jarwoko');
+            @endphp
+            <option value="{{ $s->id }}" @selected($isJarwoko)>{{ $s->name }} (Kode: {{ $s->code }})</option>
+          @endforeach
+        </select>
+        <div class="text-muted small mt-1"><i class="fa-solid fa-circle-info me-1"></i>Pilih siapa yang akan menandatangani dokumen-dokumen di bawah ini secara massal.</div>
+      </div>
+      
+      <div class="col-md-7 border-start">
+         <label class="form-label small text-muted fw-bold mb-2">Penyesuaian Visual TTE (Opsional)</label>
+         <div class="d-flex align-items-center gap-3 flex-wrap">
+            <div class="form-check form-switch mt-1">
+              <input class="form-check-input shadow-sm" type="checkbox" id="globalBarcode" checked>
+              <label class="form-check-label small" for="globalBarcode">Tampilkan Barcode</label>
+            </div>
+            <div class="form-check form-switch mt-1">
+              <input class="form-check-input shadow-sm" type="checkbox" id="globalTte" checked>
+              <label class="form-check-label small" for="globalTte">Teks & Stamp TTE</label>
+            </div>
+            
+            <div class="input-group input-group-sm shadow-sm" style="width: 85px;" title="Halaman Posisi TTE">
+              <span class="input-group-text bg-light border-0">Hal</span>
+              <input type="number" class="form-control border-light" id="globalPage" value="1" min="1">
+            </div>
+            <div class="input-group input-group-sm shadow-sm" style="width: 85px;" title="Titik X (Horizontal)">
+              <span class="input-group-text bg-light border-0"><i class="fa-solid fa-arrows-left-right text-muted mx-1"></i></span>
+              <input type="number" class="form-control border-light" id="globalX" value="0">
+            </div>
+            <div class="input-group input-group-sm shadow-sm" style="width: 85px;" title="Titik Y (Vertikal)">
+              <span class="input-group-text bg-light border-0"><i class="fa-solid fa-arrows-up-down text-muted mx-1"></i></span>
+              <input type="number" class="form-control border-light" id="globalY" value="0">
+            </div>
+            <div class="input-group input-group-sm shadow-sm" style="width: 95px;" title="Lebar Area TTE">
+              <span class="input-group-text bg-light border-0">Lebar</span>
+              <input type="number" class="form-control border-light" id="globalW" value="5">
+            </div>
+            <div class="input-group input-group-sm shadow-sm" style="width: 95px;" title="Tinggi Area TTE">
+              <span class="input-group-text bg-light border-0">Tinggi</span>
+              <input type="number" class="form-control border-light" id="globalH" value="5">
+            </div>
+         </div>
       </div>
     </div>
-
-    <div class="col-md-2">
-      <label class="form-label">Page</label>
-      <input type="number" class="form-control" name="appearance_page" min="1" value="1">
-    </div>
-    <div class="col-md-2">
-      <label class="form-label">X</label>
-      <input type="number" class="form-control" name="appearance_x" min="0" value="0">
-    </div>
-    <div class="col-md-2">
-      <label class="form-label">Y</label>
-      <input type="number" class="form-control" name="appearance_y" min="0" value="0">
-    </div>
-    <div class="col-md-2">
-      <label class="form-label">W</label>
-      <input type="number" class="form-control" name="appearance_w" min="1" value="200">
-    </div>
-    <div class="col-md-2">
-      <label class="form-label">H</label>
-      <input type="number" class="form-control" name="appearance_h" min="1" value="80">
-    </div>
-
-    <div class="col-md-2 text-end">
-      <button type="submit" class="btn btn-success">Dispatch Sign (Bulk)</button>
-      <div class="small text-muted mt-1">Max 20 data</div>
-    </div>
   </div>
+</div>
 
-  <div class="table-responsive mt-3">
-    <table class="table align-middle">
-      <thead>
+{{-- DAFTAR SERTIFIKAT CARD --}}
+<div class="card border-0 shadow-sm rounded-4">
+  <div class="card-header bg-white border-bottom p-3 d-flex flex-wrap justify-content-between align-items-center gap-3">
+    <div>
+      <h6 class="mb-0 fw-bold">Daftar Antrean Sertifikat</h6>
+      <span class="text-muted small">Tandai sertifikat di bawah ini, pastikan Konfigurasi Signer di atas telah dipilih, lalu klik Dispatch.</span>
+    </div>
+    <button type="button" class="btn btn-success rounded-pill px-4 shadow-sm" style="font-weight: 600;" id="btnBulkDispatch">
+      <i class="fa-solid fa-layer-group me-1"></i> Dispatch Terpilih (Bulk)
+    </button>
+  </div>
+  
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
         <tr>
-          <th style="width:40px;">
-            <input type="checkbox" id="checkAll">
+          <th width="5%" class="text-center">
+            <input class="form-check-input shadow-sm" type="checkbox" id="checkAll">
           </th>
-          <th>No Sertifikat</th>
+          <th width="20%">No Sertifikat</th>
           <th>Nama Peserta</th>
-          <th>Event</th>
+          <th width="30%">Event</th>
           <th>Status</th>
-          <th class="text-end">Action</th>
+          <th class="text-end" width="15%">Aksi</th>
         </tr>
       </thead>
-
       <tbody>
         @forelse(($certificates ?? collect()) as $c)
           <tr>
-            {{-- checkbox bulk --}}
-            <td>
-              <input type="checkbox" name="certificate_ids[]" value="{{ $c->id }}" class="rowCheck">
+            <td class="text-center py-3">
+              <input class="form-check-input rowCheck shadow-sm" type="checkbox" value="{{ $c->id }}">
             </td>
-
-            <td>{{ $c->certificate_number ?? $c->certificate_no ?? '-' }}</td>
-            <td>{{ $c->participant?->name ?? '-' }}</td>
-            <td>{{ $c->event?->name ?? '-' }}</td>
-            <td>
-              <span class="badge bg-success">{{ strtoupper((string) $c->status) }}</span>
+            <td class="py-3">
+               <div class="fw-semibold text-primary" style="font-size: 0.9em;">
+                 {{ $c->certificate_number ?? $c->certificate_no ?? '-' }}
+               </div>
             </td>
-
-            {{-- Actions --}}
-            <td class="text-end">
+            <td class="py-3">
+              <div class="fw-bold text-dark">{{ $c->participant?->name ?? '-' }}</div>
+            </td>
+            <td class="py-3">
+              <div class="small text-muted">{{ $c->event?->name ?? '-' }}</div>
+            </td>
+            <td class="py-3">
+              <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill">
+                {{ strtoupper((string) $c->status) }}
+              </span>
+            </td>
+            <td class="text-end py-3">
               <div class="d-inline-flex gap-2 justify-content-end">
-                {{-- Preview PDF --}}
-               <a href="{{ route('admin.certificates.view', $c->id) }}"
-   class="btn btn-outline-secondary btn-sm"
-   target="_blank">
-  Preview
-</a>
+                <a href="{{ route('admin.tte.signing.preview', $c->id) }}"
+                   class="btn btn-light btn-sm rounded-3 border bg-white shadow-sm"
+                   target="_blank" title="Cek Dokumen (Preview PDF)">
+                   <i class="fa-solid fa-eye text-secondary"></i>
+                </a>
 
-                {{-- Dispatch per-row --}}
-               <form method="POST"
-      action="{{ route('admin.tte.signing.signNow', $c->id) }}"
-      class="d-inline singleDispatchForm">
-  @csrf
-
-  <input type="hidden" name="signer_cert_code" value=""> {{-- akan diisi via JS --}}
-  <input type="hidden" name="appearance_mode" value="visible">
-  <input type="hidden" name="appearance_page" value="1">
-  <input type="hidden" name="appearance_x" value="0">
-  <input type="hidden" name="appearance_y" value="0">
-  <input type="hidden" name="appearance_w" value="200">
-  <input type="hidden" name="appearance_h" value="80">
-
-  <button type="submit" class="btn btn-primary btn-sm">Dispatch Sign</button>
-</form>
+                <button type="button" class="btn btn-primary btn-sm rounded-3 shadow-sm btnSingleDispatch fw-semibold" data-id="{{ $c->id }}" title="Langsung bubuhkan Signer ke sertifikat ini">
+                  Dispatch Sign
+                </button>
               </div>
             </td>
           </tr>
         @empty
           <tr>
-            <td colspan="6" class="text-center text-muted py-3">Tidak ada data.</td>
+            <td colspan="6" class="text-center py-5">
+              <i class="fa-solid fa-inbox text-muted fs-1 mb-3 opacity-25"></i>
+              <h5 class="text-muted fw-bold">Belum Ada Antrean</h5>
+              <p class="text-muted small mb-0">Generasi secara final PDF setidaknya 1 sertifikat agar tampil di antrean TTE.</p>
+            </td>
           </tr>
         @endforelse
       </tbody>
     </table>
   </div>
-</form>
+  
+  @if(isset($certificates) && method_exists($certificates, 'links'))
+    <div class="card-footer bg-white border-top p-3">
+      {{ $certificates->links() }}
+    </div>
+  @endif
+</div>
 
-@if(isset($certificates) && method_exists($certificates, 'links'))
-  <div class="mt-3">
-    {{ $certificates->links() }}
-  </div>
-@endif
+{{-- Hidden Core Form to Submit Safely (No Nested forms allowed in HTML!) --}}
+<form id="dispatchForm" method="POST" style="display: none;">
+    @csrf
+    <input type="hidden" name="signer_certificate_id" id="formSigner">
+    <input type="hidden" name="barcode_visible" id="formBarcode">
+    <input type="hidden" name="tte_visible" id="formTte">
+    <input type="hidden" name="appearance_page" id="formPage">
+    <input type="hidden" name="appearance_x" id="formX">
+    <input type="hidden" name="appearance_y" id="formY">
+    <input type="hidden" name="appearance_w" id="formW">
+    <input type="hidden" name="appearance_h" id="formH">
+    <div id="formCertificatesIds"></div>
+</form>
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  const checkAll = document.getElementById('checkAll');
-  const rowChecks = document.querySelectorAll('.rowCheck');
+    const checkAll = document.getElementById('checkAll');
+    const rowChecks = document.querySelectorAll('.rowCheck');
+    
+    // Toggle all checkboxes
+    if (checkAll) {
+        checkAll.addEventListener('change', () => {
+            rowChecks.forEach(ch => ch.checked = checkAll.checked);
+        });
+    }
 
-  if (checkAll) {
-    checkAll.addEventListener('change', () => {
-      rowChecks.forEach(ch => ch.checked = checkAll.checked);
+    // Capture Config Panel Values
+    const configSigner = document.getElementById('globalSignerSelect');
+    const configBarcode = document.getElementById('globalBarcode');
+    const configTte = document.getElementById('globalTte');
+    const configPage = document.getElementById('globalPage');
+    const configX = document.getElementById('globalX');
+    const configY = document.getElementById('globalY');
+    const configW = document.getElementById('globalW');
+    const configH = document.getElementById('globalH');
+
+    // Hidden form element references
+    const dispatchForm = document.getElementById('dispatchForm');
+    const formSigner = document.getElementById('formSigner');
+    const formBarcode = document.getElementById('formBarcode');
+    const formTte = document.getElementById('formTte');
+    const formPage = document.getElementById('formPage');
+    const formX = document.getElementById('formX');
+    const formY = document.getElementById('formY');
+    const formW = document.getElementById('formW');
+    const formH = document.getElementById('formH');
+    const formCertificatesIds = document.getElementById('formCertificatesIds');
+
+    // Method to safely grab values to the hidden form
+    const populateVariables = () => {
+        if (!configSigner.value) {
+            configSigner.classList.add('is-invalid');
+            alert('⚠️ HARAP DIPERHATIKAN:\nAnda harus memilih [Signer (Penanda Tangan)] pada panel konfigurasi di atas terlebih dahulu!');
+            configSigner.focus();
+            return false;
+        }
+        configSigner.classList.remove('is-invalid');
+
+        formSigner.value = configSigner.value;
+        formBarcode.value = configBarcode.checked ? '1' : '0';
+        formTte.value = configTte.checked ? '1' : '0';
+        formPage.value = configPage.value || '1';
+        formX.value = configX.value || '0';
+        formY.value = configY.value || '0';
+        formW.value = configW.value || '200';
+        formH.value = configH.value || '80';
+        
+        return true;
+    };
+
+    // Single Button Dispatch Request Linker
+    document.querySelectorAll('.btnSingleDispatch').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (!populateVariables()) return;
+            
+            formCertificatesIds.innerHTML = ''; // Wipe Bulk IDs array
+            
+            // Alter Form action dynamically to use Single Path
+            let certId = btn.getAttribute('data-id');
+            // Assuming the route looks like 'admin/tte/signing/{id}/dispatch'
+            dispatchForm.action = '{{ url('admin/tte/signing') }}/' + certId + '/dispatch';
+            dispatchForm.submit();
+            
+            // Set Loading state
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            btn.classList.remove('btn-primary');
+            btn.classList.add('btn-secondary');
+            btn.disabled = true;
+        });
     });
-  }
 
-  const signerSelect = document.querySelector('select[name="signer_certificate_id"]');
-  const barcodeVisible = document.getElementById('barcode_visible');
-  const tteVisible = document.getElementById('tte_visible');
+    // Mass Bulk Row Multi-Select Dispatch Linker
+    const btnBulk = document.getElementById('btnBulkDispatch');
+    if(btnBulk) {
+        btnBulk.addEventListener('click', () => {
+            let selectedIds = [];
+            rowChecks.forEach(ch => {
+                if (ch.checked) selectedIds.push(ch.value);
+            });
 
-  const page = document.querySelector('input[name="appearance_page"]');
-  const x = document.querySelector('input[name="appearance_x"]');
-  const y = document.querySelector('input[name="appearance_y"]');
-  const w = document.querySelector('input[name="appearance_w"]');
-  const h = document.querySelector('input[name="appearance_h"]');
+            if (selectedIds.length === 0) {
+                alert('⚠️ Anda belum menandai (mencentang) sertifikat apa pun di tabel bawah.');
+                return;
+            }
 
-  document.querySelectorAll('.singleDispatchForm').forEach(form => {
-    form.addEventListener('submit', (e) => {
-      if (!signerSelect || !signerSelect.value) {
-        e.preventDefault();
-        alert('Pilih signer terlebih dahulu.');
-        return;
-      }
+            if (selectedIds.length > 20) {
+                alert('Maksimal pengiriman adalah 20 sertifikat dalam 1x klik eksekusi TTE. Saat ini Anda memilih ' + selectedIds.length + ' data.');
+                return;
+            }
 
-      form.querySelector('input[name="signer_cert_code"]').value = signerSelect.value;
-      Visible.checked) ? '1' : '0';
-      form.querySelector('input[name="tte_visible"]').value = (tteVisible && tteVisible.checked) ? '1' : '0';
+            if (!populateVariables()) return;
 
-      form.querySelector('input[name="appearance_page"]').value = (page && page.value) ? page.value : '1';
-      form.querySelector('input[name="appearance_x"]').value = (x && x.value) ? x.value : '0';
-      form.querySelector('input[name="appearance_y"]').value = (y && y.value) ? y.value : '0';
-      form.querySelector('input[name="appearance_w"]').value = (w && w.value) ? w.value : '200';
-      form.querySelector('input[name="appearance_h"]').value = (h && h.value) ? h.value : '80';
-    });
-  });
+            // Send IDs into Array to The Hidden form Element
+            formCertificatesIds.innerHTML = '';
+            selectedIds.forEach(id => {
+                let input = document.createElement('input');
+                input.type = 'hidden';
+                input.name = 'certificate_ids[]';
+                input.value = id;
+                formCertificatesIds.appendChild(input);
+            });
+
+            // Alter Form action dynamically to use Bulk Path Route
+            dispatchForm.action = '{{ route('admin.tte.signing.dispatchBulk') }}';
+            dispatchForm.submit();
+            
+            // Set Loading State
+            btnBulk.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-2"></i>Mengeksekusi Antrean...';
+            btnBulk.disabled = true;
+        });
+    }
 });
 </script>
 @endsection

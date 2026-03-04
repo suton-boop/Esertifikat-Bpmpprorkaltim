@@ -10,7 +10,11 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 class Participant extends Model
 {
     protected $fillable = [
-        'event_id','name','email','nik','institution','status',
+        'event_id', 'name', 'email', 'nik', 'institution', 'daerah', 'jenjang', 'peran', 'keterangan', 'status', 'metadata'
+    ];
+
+    protected $casts = [
+        'metadata' => 'array',
     ];
 
     public function event(): BelongsTo

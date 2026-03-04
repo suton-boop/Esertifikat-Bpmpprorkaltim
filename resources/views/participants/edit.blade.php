@@ -70,6 +70,36 @@
         <input name="institution" class="form-control" value="{{ old('institution', $participant->institution) }}">
       </div>
 
+      <div class="col-md-6">
+        <label class="form-label">Kab./Kota/Propinsi (opsional)</label>
+        <select name="daerah" class="form-select">
+          <option value="">-- Pilih Daerah --</option>
+          @foreach(['Prov. Kalimantan Timur', 'Kab. Paser', 'Kab. Berau', 'Kab. Kutai Kartanegara', 'Kab. Kutai Barat', 'Kab. Kutai Timur', 'Kab. Penajam Paser Utara', 'Kab. Mahakam Ulu', 'Kota Balikpapan', 'Kota Samarinda', 'Kota Bontang'] as $d)
+            <option value="{{ $d }}" @selected(old('daerah', $participant->daerah) === $d)>{{ $d }}</option>
+          @endforeach
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Jenjang (opsional)</label>
+        <select name="jenjang" class="form-select">
+          <option value="">-- Pilih Jenjang --</option>
+          @foreach(['PAUD-TK', 'SD', 'SMP', 'SMA', 'SMK', 'PNF', 'Umum'] as $j)
+            <option value="{{ $j }}" @selected(old('jenjang', $participant->jenjang) === $j)>{{ $j }}</option>
+          @endforeach
+        </select>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Peran (opsional)</label>
+        <input name="peran" class="form-control" value="{{ old('peran', $participant->peran) }}">
+      </div>
+
+      <div class="col-md-12">
+        <label class="form-label">Keterangan (opsional)</label>
+        <textarea name="keterangan" class="form-control" rows="2">{{ old('keterangan', $participant->keterangan) }}</textarea>
+      </div>
+
     </div>
   </div>
 

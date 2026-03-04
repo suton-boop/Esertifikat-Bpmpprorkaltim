@@ -42,9 +42,10 @@
 
       <div class="col-md-4">
         <label class="form-label fw-semibold">Status</label>
-        <select name="is_active" class="form-select">
-          <option value="1" @selected(old('is_active', 1) == 1)>Aktif</option>
-          <option value="0" @selected(old('is_active') == 0)>Nonaktif</option>
+        <select name="status" class="form-select" required>
+          <option value="active" @selected(old('status', 'active') === 'active')>Aktif (Active)</option>
+          <option value="draft" @selected(old('status') === 'draft')>Draf (Draft)</option>
+          <option value="closed" @selected(old('status') === 'closed')>Selesai (Closed)</option>
         </select>
         <div class="form-text">Event nonaktif tidak muncul di proses operasional.</div>
       </div>

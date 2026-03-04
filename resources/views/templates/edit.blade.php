@@ -64,13 +64,20 @@
 
             <div class="col-md-4">
               <label class="form-label">Kode</label>
-              <input type="text"
-                     name="code"
-                     class="form-control"
-                     value="{{ old('code', $template->code) }}"
-                     placeholder="Contoh: P06"
-                     required>
-              <div class="form-text">Kode unik untuk identifikasi template.</div>
+              <div class="input-group shadow-sm">
+                <input type="text"
+                       name="code"
+                       id="templateCode"
+                       class="form-control bg-light fw-bold text-primary"
+                       value="{{ old('code', $template->code) }}"
+                       placeholder="Otomatis"
+                       readonly
+                       required>
+                <div class="input-group-text bg-light text-muted">
+                    <i class="fa-solid fa-lock"></i>
+                </div>
+              </div>
+              <div class="form-text mt-1">Kode template terbentuk otomatis dan tidak dapat diubah.</div>
             </div>
 
             <div class="col-md-8">
@@ -118,8 +125,32 @@
       </div>
     </div>
 
-    {{-- RIGHT: JSON SETTINGS --}}
+    {{-- RIGHT: JSON SETTINGS & PAGE 2 CONF --}}
     <div class="col-lg-5">
+      <div class="card card-soft mb-3">
+        <div class="card-body">
+          <div class="fw-semibold mb-2">Konfigurasi Halaman 2 (Transkrip/Struktur)</div>
+          
+          <label class="form-label">Background Halaman 2 (Opsional)</label>
+          <input type="file" name="page_2_background" class="form-control mb-2">
+          @if(!empty($template->page_2_background_path))
+            <a class="btn btn-outline-primary btn-sm btn-icon mb-3"
+               href="{{ asset('storage/'.$template->page_2_background_path) }}"
+               target="_blank" rel="noopener">
+              <i class="fa-regular fa-eye"></i> Lihat file saat ini
+            </a>
+          @endif
+
+          <label class="form-label">Editor HTML Halaman 2</label>
+          <textarea name="page_2_html"
+                    class="form-control"
+                    rows="8"
+                    placeholder="Contoh: <table>...</table> atau @{{ nama_kolom_excel }}">{{ old('page_2_html', $template->page_2_html) }}</textarea>
+          <div class="form-text">
+            Tabel struktur program atau nilai. Anda bisa memanggil nilai dari Excel dengan format kurung kurawal ganda, contoh: <code>@{{ nilai_dasar }}</code>. Kosongkan jika sertifikat hanya 1 halaman.
+          </div>
+        </div>
+      </div>
       <div class="card card-soft">
         <div class="card-body">
           <div class="d-flex align-items-center justify-content-between mb-2">

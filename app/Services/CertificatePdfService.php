@@ -34,23 +34,33 @@ class CertificatePdfService
 
         // ====== BACKGROUND (base64) untuk dompdf ======
         $bgDataUri = null;
+        $bgDataUri2 = null;
 
-        // utamakan file_path, fallback background_path bila ada
+        // ====== BACKGROUND 1 ======
         $bgRel = $template->file_path ?? $template->background_path ?? null;
-
         if (is_string($bgRel) && trim($bgRel) !== '') {
             $bgRel = ltrim(preg_replace('#^storage/#', '', $bgRel), '/');
-
             if (Storage::disk('public')->exists($bgRel)) {
                 $bgFull = Storage::disk('public')->path($bgRel);
                 $ext = strtolower(pathinfo($bgFull, PATHINFO_EXTENSION));
-
-                // dompdf aman untuk png/jpg/jpeg
                 if (in_array($ext, ['png', 'jpg', 'jpeg'], true)) {
                     $mime = $ext === 'png' ? 'image/png' : 'image/jpeg';
                     $bgDataUri = 'data:' . $mime . ';base64,' . base64_encode(file_get_contents($bgFull));
                 }
-                // kalau PDF -> abaikan (dompdf tidak bisa jadi background image)
+            }
+        }
+
+        // ====== BACKGROUND 2 ======
+        $bgRel2 = $template->page_2_background_path ?? null;
+        if (is_string($bgRel2) && trim($bgRel2) !== '') {
+            $bgRel2 = ltrim(preg_replace('#^storage/#', '', $bgRel2), '/');
+            if (Storage::disk('public')->exists($bgRel2)) {
+                $bgFull2 = Storage::disk('public')->path($bgRel2);
+                $ext2 = strtolower(pathinfo($bgFull2, PATHINFO_EXTENSION));
+                if (in_array($ext2, ['png', 'jpg', 'jpeg'], true)) {
+                    $mime2 = $ext2 === 'png' ? 'image/png' : 'image/jpeg';
+                    $bgDataUri2 = 'data:' . $mime2 . ';base64,' . base64_encode(file_get_contents($bgFull2));
+                }
             }
         }
 
@@ -61,7 +71,7 @@ class CertificatePdfService
         // nama file aman
         $safeName = Str::slug($certificate->participant->name ?: 'peserta');
         $fileName = $certificate->certificate_number
-            ? Str::slug($certificate->certificate_number)
+            ?Str::slug($certificate->certificate_number)
             : "cert-{$certificate->id}";
 
         $file = "{$fileName}-{$safeName}.pdf";
@@ -70,10 +80,11 @@ class CertificatePdfService
         // Render PDF
         $pdf = Pdf::loadView('certificates.pdf', [
             'certificate' => $certificate,
-            'event'       => $certificate->event,
+            'event' => $certificate->event,
             'participant' => $certificate->participant,
-            'template'    => $template,
-            'bgDataUri'   => $bgDataUri, // ✅ dipakai di blade
+            'template' => $template,
+            'bgDataUri' => $bgDataUri, // ✅ dipakai di blade
+            'bgDataUri2' => $bgDataUri2,
         ])->setPaper('a4', 'landscape');
 
         Storage::disk('public')->put($relativePath, $pdf->output());

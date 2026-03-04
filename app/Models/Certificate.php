@@ -22,7 +22,14 @@ class Certificate extends Model
      * Pastikan hanya ADA SATU $fillable (ini).
      * Sesuaikan dengan kolom yang BENAR di tabelmu.
      */
+    
     protected $fillable = [
+        'pdf_path',
+        'signed_pdf_path',
+        'signed_at',
+        'verify_token',
+        'status',
+      
         'event_id',
         'participant_id',
 

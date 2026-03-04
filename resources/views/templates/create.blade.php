@@ -2,139 +2,166 @@
 @section('title','Tambah Template')
 
 @section('content')
-  @include('templates.form', ['mode' => 'create'])
-@endsection
-
-@extends('layouts.app')
-
-@section('title', 'Tambah Template')
-
-@section('content')
-<div class="container-fluid">
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <div>
-      <h4 class="mb-0">Tambah Template Sertifikat</h4>
-      <div class="text-muted small">Upload file template sertifikat dan isi informasi template.</div>
+<div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+  <div>
+    <div class="text-muted small mb-1">
+      <i class="fa-regular fa-folder-open me-1"></i>
+      Manajemen Sistem / Template Sertifikat / Tambah
     </div>
-
-    <a href="{{ route('admin.templates.index') }}" class="btn btn-outline-secondary rounded-3">
-      <i class="fa-solid fa-arrow-left me-1"></i> Kembali
-    </a>
+    <h4 class="page-title mb-1">Tambah Template</h4>
+    <div class="page-subtitle">Upload file template sertifikat dan isikan datanya.</div>
   </div>
 
-  {{-- Alert Error --}}
-  @if ($errors->any())
-    <div class="alert alert-danger">
-      <div class="fw-bold mb-1">Terjadi kesalahan:</div>
-      <ul class="mb-0">
-        @foreach ($errors->all() as $err)
-          <li>{{ $err }}</li>
-        @endforeach
-      </ul>
-    </div>
-  @endif
-
-  {{-- Alert Success --}}
-  @if(session('success'))
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-      {{ session('success') }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  @endif
-
-  {{-- Alert Error Session --}}
-  @if(session('error'))
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-      {{ session('error') }}
-      <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-    </div>
-  @endif
-
-  <div class="card shadow-sm rounded-4">
-    <div class="card-body">
-
-      <form method="POST" action="{{ route('admin.templates.store') }}" enctype="multipart/form-data">
-        @csrf
-
-        <div class="row g-3">
-
-          {{-- Nama Template --}}
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Nama Template</label>
-            <input type="text"
-                   name="name"
-                   class="form-control"
-                   placeholder="Contoh: Template BPMP Kaltim"
-                   value="{{ old('name') }}"
-                   required>
-          </div>
-
-          {{-- Kode Template --}}
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Kode Template</label>
-            <input type="text"
-                   name="code"
-                   class="form-control"
-                   placeholder="Contoh: BPMPKALTIM"
-                   value="{{ old('code') }}"
-                   required>
-            <div class="text-muted small mt-1">
-              Kode harus unik, biasanya huruf besar tanpa spasi.
-            </div>
-          </div>
-
-          {{-- Upload File --}}
-          <div class="col-md-12">
-            <label class="form-label fw-semibold">File Template</label>
-            <input type="file"
-                   name="file"
-                   class="form-control"
-                   accept=".png,.jpg,.jpeg,.pdf"
-                   required>
-
-            <div class="text-muted small mt-1">
-              Format yang disarankan: PNG/JPG (background sertifikat) atau PDF.
-            </div>
-          </div>
-
-          {{-- Aktif / Tidak --}}
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Status Template</label>
-            <select name="is_active" class="form-select">
-              <option value="1" {{ old('is_active', '1') == '1' ? 'selected' : '' }}>Aktif</option>
-              <option value="0" {{ old('is_active') == '0' ? 'selected' : '' }}>Nonaktif</option>
-            </select>
-          </div>
-
-          {{-- Settings JSON (opsional) --}}
-          <div class="col-md-6">
-            <label class="form-label fw-semibold">Pengaturan (Opsional)</label>
-            <textarea name="settings"
-                      class="form-control"
-                      rows="3"
-                      placeholder='{"font":"Arial","size":14}'>{{ old('settings') }}</textarea>
-            <div class="text-muted small mt-1">
-              Boleh dikosongkan. Format JSON jika diperlukan.
-            </div>
-          </div>
-
-        </div>
-
-        <hr class="my-4">
-
-        <div class="d-flex justify-content-end gap-2">
-          <a href="{{ route('admin.templates.index') }}" class="btn btn-outline-secondary rounded-3">
-            Batal
-          </a>
-
-          <button type="submit" class="btn btn-primary rounded-3">
-            <i class="fa-solid fa-save me-1"></i> Simpan Template
-          </button>
-        </div>
-
-      </form>
-
-    </div>
-  </div>
+  <a href="{{ route('admin.system.templates.index') }}" class="btn btn-outline-secondary btn-icon">
+    <i class="fa-solid fa-arrow-left"></i> Kembali
+  </a>
 </div>
+
+@if ($errors->any())
+  <div class="alert alert-danger card-soft">
+    <div class="fw-semibold mb-1">Periksa kembali input:</div>
+    <ul class="mb-0">
+      @foreach ($errors->all() as $err)
+        <li>{{ $err }}</li>
+      @endforeach
+    </ul>
+  </div>
+@endif
+
+<form method="POST"
+      action="{{ route('admin.system.templates.store') }}"
+      enctype="multipart/form-data">
+  @csrf
+
+  <div class="row g-3">
+    {{-- LEFT: MAIN INFO --}}
+    <div class="col-lg-7">
+      <div class="card card-soft">
+        <div class="card-body">
+          <div class="fw-semibold mb-2">Informasi Template</div>
+
+          <div class="row g-3 mt-1">
+            <div class="col-12">
+              <label class="form-label">Nama Template</label>
+              <input type="text"
+                     name="name"
+                     class="form-control"
+                     value="{{ old('name') }}"
+                     placeholder="Contoh: Penguatan Literasi"
+                     required>
+            </div>
+
+            <div class="col-md-4">
+              <label class="form-label">Kode</label>
+              <div class="input-group shadow-sm">
+                <input type="text"
+                       name="code"
+                       id="templateCode"
+                       class="form-control bg-light fw-bold text-primary"
+                       value="{{ old('code', 'TPL-' . strtoupper(Str::random(5))) }}"
+                       placeholder="Otomatis"
+                       readonly
+                       required>
+                <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('templateCode').value = 'TPL-' + Math.random().toString(36).substring(2, 7).toUpperCase();" title="Refresh/Generate Ulang Kode">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
+              </div>
+              <div class="form-text mt-1">Kode otomatis digenerate secara acak.</div>
+            </div>
+
+            <div class="col-md-8">
+              <label class="form-label">Status</label>
+              <select name="is_active" class="form-select">
+                <option value="1" @selected(old('is_active', 1) == 1)>Aktif</option>
+                <option value="0" @selected(old('is_active') == 0)>Nonaktif</option>
+              </select>
+            </div>
+
+            <div class="col-12">
+              <label class="form-label">Deskripsi Template (opsional)</label>
+              <textarea name="description"
+                        class="form-control"
+                        rows="3"
+                        placeholder="Catatan internal template.">{{ old('description') }}</textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {{-- BACKGROUND FILE --}}
+      <div class="card card-soft mt-3">
+        <div class="card-body">
+          <div class="fw-semibold mb-2">Background</div>
+
+          <label class="form-label">File Background Halaman Depan</label>
+          <input type="file" name="background" class="form-control" required>
+
+          <div class="form-text mt-2">
+            Disarankan PNG atau JPG berukuran A4.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    {{-- RIGHT: JSON SETTINGS & PAGE 2 CONF --}}
+    <div class="col-lg-5">
+      
+      <div class="card card-soft mb-3">
+        <div class="card-body">
+          <div class="fw-semibold mb-2">Konfigurasi Halaman 2 (Transkrip/Struktur)</div>
+          
+          <label class="form-label">Background Halaman 2 (Opsional)</label>
+          <input type="file" name="page_2_background" class="form-control mb-2">
+
+          <label class="form-label">Editor HTML Halaman 2</label>
+          <textarea name="page_2_html"
+                    class="form-control"
+                    rows="8"
+                    placeholder="Contoh: <table>...</table> atau @{{ nama_kolom_excel }}">{{ old('page_2_html') }}</textarea>
+          <div class="form-text">
+            Tabel struktur program atau nilai. Anda bisa memanggil nilai dari Excel. Kosongkan jika sertifikat hanya 1 halaman.
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-soft">
+        <div class="card-body">
+          <div class="d-flex align-items-center justify-content-between mb-2">
+            <div class="fw-semibold">Settings (JSON)</div>
+          </div>
+
+          <div class="form-text mb-2">
+            Format JSON untuk letak text.
+          </div>
+          
+          @php
+             $defaultSettingsJSON = json_encode([
+                 "fields" => [
+                     "number" => ["x"=>0,"y"=>210,"w"=>1123,"font"=>16,"color"=>"#111111","align"=>"center","weight"=>"600"],
+                     "name" => ["x"=>0,"y"=>315,"w"=>1123,"font"=>48,"color"=>"#0b5fa8","align"=>"center","weight"=>"700"],
+                     "event" => ["x"=>0,"y"=>410,"w"=>1123,"font"=>20,"color"=>"#0b5fa8","align"=>"center","weight"=>"400"],
+                     "desc" => ["x"=>120,"y"=>450,"w"=>880,"font"=>16,"color"=>"#111111","align"=>"justify","weight"=>"400"],
+                     "date" => ["x"=>0,"y"=>567,"w"=>1123,"font"=>16,"color"=>"#111111","align"=>"center","weight"=>"500"]
+                 ]
+             ], JSON_PRETTY_PRINT);
+          @endphp
+
+          <textarea id="settingsJson"
+                    name="settings"
+                    class="form-control mono"
+                    rows="18"
+                    placeholder='{"fields":{"name":{"x":0,"y":0,"font":18}}}'>{{ old('settings', $defaultSettingsJSON) }}</textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {{-- ACTIONS --}}
+  <div class="d-flex justify-content-end gap-2 mt-3">
+    <a href="{{ route('admin.system.templates.index') }}" class="btn btn-outline-secondary">Batal</a>
+    <button class="btn btn-primary btn-icon">
+      <i class="fa-solid fa-floppy-disk"></i> Simpan
+    </button>
+  </div>
+</form>
 @endsection

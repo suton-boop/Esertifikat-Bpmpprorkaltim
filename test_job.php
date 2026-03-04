@@ -1,0 +1,1 @@
+<?php require "vendor/autoload.php"; $app = require_once "bootstrap/app.php"; $app->make(Illuminate\Contracts\Console\Kernel::class)->bootstrap(); $job = new \App\Jobs\SignCertificateJob(1, "S", 1, "i", "u", []); var_dump($job);

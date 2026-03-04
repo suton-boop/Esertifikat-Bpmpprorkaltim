@@ -16,12 +16,14 @@ class CertificateTemplate extends Model
         'description',
         'file_path',
         'settings',
+        'page_2_background_path',
+        'page_2_html',
         'is_active',
         'created_by',
     ];
 
     protected $casts = [
-        'settings'  => 'array',   // settings JSON -> array
+        'settings' => 'array', // settings JSON -> array
         'is_active' => 'boolean',
     ];
 
@@ -30,7 +32,7 @@ class CertificateTemplate extends Model
      */
     public function events(): HasMany
     {
-        return $this->hasMany(Event::class, 'certificate_template_id');
+        return $this->hasMany(Event::class , 'certificate_template_id');
     }
 
     /**
@@ -39,6 +41,6 @@ class CertificateTemplate extends Model
      */
     public function creator(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by');
+        return $this->belongsTo(User::class , 'created_by');
     }
 }

@@ -1,0 +1,4 @@
+name,email,nik,institution,status,nilai_sikap,nilai_praktek,status_kelulusan
+Budi Santoso,budi@guru.sd,1234567890123456,SDN 01 Samarinda,1,90,85,LULUS SANGAT BAIK
+Siti Aminah,siti@guru.smp,9876543210987654,SMPN 05 Balikpapan,1,88,92,LULUS SANGAT BAIK
+Andi Pratama,andi@guru.sma,8888777766665555,SMAN 02 Tenggarong,1,75,80,LULUS MEMUASKAN

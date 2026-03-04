@@ -19,7 +19,7 @@ class ApprovalController extends Controller
         $certificates = Certificate::query()
             ->with(['event', 'participant'])
             ->where('status', Certificate::STATUS_SUBMITTED)
-            ->when($eventId, fn ($q) => $q->where('event_id', $eventId))
+            ->when($eventId, fn($q) => $q->where('event_id', $eventId))
             ->latest('submitted_at')
             ->paginate(20)
             ->withQueryString();
@@ -36,25 +36,24 @@ class ApprovalController extends Controller
 
         DB::transaction(function () use ($certificate) {
 
-            $year = (int) now()->format('Y');
+            $year = (int)now()->format('Y');
 
-            $maxSeq = Certificate::where('event_id', $certificate->event_id)
-                ->where('year', $year)
+            $maxSeq = Certificate::where('year', $year)
                 ->lockForUpdate()
                 ->max('sequence');
 
-            $nextSeq = ((int) $maxSeq) + 1;
+            $nextSeq = ((int)$maxSeq) + 1;
 
             $prefix = 'Sertifikat/BPMP.Kaltim/' . $year;
-            $no = str_pad((string) $nextSeq, 4, '0', STR_PAD_LEFT) . '/' . $prefix;
+            $no = str_pad((string)$nextSeq, 4, '0', STR_PAD_LEFT) . '/' . $prefix;
 
             $certificate->update([
-                'status'             => Certificate::STATUS_APPROVED,
-                'year'               => $year,
-                'sequence'           => $nextSeq,
+                'status' => Certificate::STATUS_APPROVED,
+                'year' => $year,
+                'sequence' => $nextSeq,
                 'certificate_number' => $no,
-                'approved_at'        => now(),
-                'approved_by'        => auth()->id(),
+                'approved_at' => now(),
+                'approved_by' => auth()->id(),
             ]);
         });
 
@@ -73,9 +72,9 @@ class ApprovalController extends Controller
         ]);
 
         $certificate->update([
-            'status'        => Certificate::STATUS_REJECTED,
-            'rejected_at'   => now(),
-            'rejected_by'   => auth()->id(),
+            'status' => Certificate::STATUS_REJECTED,
+            'rejected_at' => now(),
+            'rejected_by' => auth()->id(),
             'rejected_note' => $data['rejected_note'],
         ]);
 
@@ -92,7 +91,7 @@ class ApprovalController extends Controller
 
         DB::transaction(function () use ($eventId, $request) {
 
-            $year = (int) now()->format('Y');
+            $year = (int)now()->format('Y');
 
             // Ambil semua submitted yang akan diproses (urut by submitted_at biar rapi)
             $query = Certificate::query()
@@ -108,33 +107,26 @@ class ApprovalController extends Controller
                 return;
             }
 
-            // Untuk event filter: sequence dihitung per event.
-            // Jadi kita proses per event_id (group).
-            $byEvent = $certs->groupBy('event_id');
+            // Generate sequence global per tahun
+            $maxSeq = Certificate::where('year', $year)
+                ->lockForUpdate()
+                ->max('sequence');
 
-            foreach ($byEvent as $evId => $items) {
-                $maxSeq = Certificate::where('event_id', $evId)
-                    ->where('year', $year)
-                    ->lockForUpdate()
-                    ->max('sequence');
+            $seq = (int)$maxSeq;
+            $prefix = 'Sertifikat/BPMP.Kaltim/' . $year;
 
-                $seq = ((int) $maxSeq);
+            foreach ($certs as $c) {
+                $seq++;
+                $no = str_pad((string)$seq, 4, '0', STR_PAD_LEFT) . '/' . $prefix;
 
-                $prefix = 'Sertifikat/BPMP.Kaltim/' . $year;
-
-                foreach ($items as $c) {
-                    $seq++;
-                    $no = str_pad((string) $seq, 4, '0', STR_PAD_LEFT) . '/' . $prefix;
-
-                    $c->update([
-                        'status'             => Certificate::STATUS_APPROVED,
-                        'year'               => $year,
-                        'sequence'           => $seq,
-                        'certificate_number' => $no,
-                        'approved_at'        => now(),
-                        'approved_by'        => auth()->id(),
-                    ]);
-                }
+                $c->update([
+                    'status' => Certificate::STATUS_APPROVED,
+                    'year' => $year,
+                    'sequence' => $seq,
+                    'certificate_number' => $no,
+                    'approved_at' => now(),
+                    'approved_by' => auth()->id(),
+                ]);
             }
         });
 
@@ -148,7 +140,7 @@ class ApprovalController extends Controller
     public function rejectAll(Request $request)
     {
         $data = $request->validate([
-            'event_id'      => ['nullable', 'integer', 'exists:events,id'],
+            'event_id' => ['nullable', 'integer', 'exists:events,id'],
             'rejected_note' => ['required', 'string', 'max:2000'],
         ]);
 
@@ -158,11 +150,11 @@ class ApprovalController extends Controller
             ->where('status', Certificate::STATUS_SUBMITTED)
             ->when($eventId, fn($q) => $q->where('event_id', $eventId))
             ->update([
-                'status'        => Certificate::STATUS_REJECTED,
-                'rejected_at'   => now(),
-                'rejected_by'   => auth()->id(),
-                'rejected_note' => $data['rejected_note'],
-            ]);
+            'status' => Certificate::STATUS_REJECTED,
+            'rejected_at' => now(),
+            'rejected_by' => auth()->id(),
+            'rejected_note' => $data['rejected_note'],
+        ]);
 
         return back()->with('success', "Reject All berhasil. Total ditolak: {$affected}");
     }

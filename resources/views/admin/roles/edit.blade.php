@@ -2,15 +2,15 @@
 @section('title','Kelola Permission Role')
 
 @section('content')
-<div class="d-flex justify-content-between align-items-center mb-3">
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
     <div>
-        <h4 class="mb-0">Kelola Permission Role</h4>
-        <div class="text-muted small">
-            Role: <span class="fw-semibold">{{ $role->name }}</span>
+        <h4 class="mb-0 fw-bold"><i class="fa-solid fa-user-shield me-2 text-primary"></i>Kelola Permission Role</h4>
+        <div class="text-muted mt-1">
+            Mengatur hak akses sistem untuk role: <span class="badge bg-primary fs-6">{{ Str::title($role->name) }}</span>
         </div>
     </div>
 
-    <a href="{{ route('admin.system.roles.index') }}" class="btn btn-outline-secondary btn-sm rounded-3">
+    <a href="{{ route('admin.system.roles.index') }}" class="btn btn-light border-secondary shadow-sm rounded-3 fw-semibold">
         <i class="fa-solid fa-arrow-left me-1"></i> Kembali
     </a>
 </div>
@@ -40,24 +40,27 @@
             </span>
         </div>
 
-        <div class="card-body">
+        <div class="card-body p-4 bg-light">
             <div class="row g-3">
 
                 {{-- CHECKBOX PERMISSION --}}
                 @foreach($permissions as $p)
                 <div class="col-md-4 col-lg-3">
-                    <div class="form-check border rounded-3 p-2 bg-light">
-                        <input class="form-check-input"
-                               type="checkbox"
-                               name="permissions[]"
-                               value="{{ $p->id }}"
-                               id="perm{{ $p->id }}"
-                               {{ in_array($p->id, $rolePerms) ? 'checked' : '' }}>
-
-                        <label class="form-check-label fw-semibold" for="perm{{ $p->id }}">
-                            {{ $p->name }}
-                        </label>
-                    </div>
+                    <label class="card border-0 shadow-sm h-100 d-flex flex-row align-items-center p-3" style="cursor: pointer; transition: all 0.2s ease-in-out;" onmouseover="this.classList.add('shadow'); this.style.transform='translateY(-2px)'" onmouseout="this.classList.remove('shadow'); this.style.transform='none'">
+                        <div class="form-check form-switch mb-0 d-flex align-items-center ps-0 w-100">
+                            <input class="form-check-input m-0 me-3 shadow-none flex-shrink-0"
+                                   type="checkbox"
+                                   role="switch"
+                                   name="permissions[]"
+                                   value="{{ $p->id }}"
+                                   id="perm{{ $p->id }}"
+                                   {{ in_array($p->id, $rolePerms) ? 'checked' : '' }}
+                                   style="width: 2.5em; height: 1.25em; cursor: pointer;">
+                            <span class="form-check-label fw-bold text-dark text-break" style="cursor: pointer;">
+                                {{ str_replace('-', ' ', Str::title($p->name)) }}
+                            </span>
+                        </div>
+                    </label>
                 </div>
                 @endforeach
 

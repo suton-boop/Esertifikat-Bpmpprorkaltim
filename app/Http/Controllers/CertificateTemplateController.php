@@ -11,14 +11,15 @@ class CertificateTemplateController extends Controller
 {
     public function index(Request $request)
     {
-        $q = trim((string) $request->query('q', ''));
+        $q = trim((string)$request->query('q', ''));
 
         $templates = CertificateTemplate::query()
             ->when($q !== '', function ($query) use ($q) {
-                $query->where(function ($sub) use ($q) {
+            $query->where(function ($sub) use ($q) {
                     $sub->where('name', 'like', "%{$q}%")
                         ->orWhere('code', 'like', "%{$q}%");
-                });
+                }
+                );
             })
             ->latest()
             ->paginate(10)
@@ -35,15 +36,17 @@ class CertificateTemplateController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
-            'code'        => ['required', 'string', 'max:50', Rule::unique('certificate_templates', 'code')],
+            'name' => ['required', 'string', 'max:255'],
+            'code' => ['required', 'string', 'max:50', Rule::unique('certificate_templates', 'code')],
             'description' => ['nullable', 'string'],
-            'is_active'   => ['nullable'], // akan diproses boolean()
-            'settings'    => ['nullable', 'json'], // wajib JSON valid kalau diisi
+            'is_active' => ['nullable'], // akan diproses boolean()
+            'settings' => ['nullable', 'json'], // wajib JSON valid kalau diisi
 
             // dukung 2 nama input file: file / background
-            'file'        => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp,pdf', 'max:5120'],
-            'background'  => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp,pdf', 'max:5120'],
+            'file' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp,pdf', 'max:5120'],
+            'background' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp,pdf', 'max:5120'],
+            'page_2_background' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp,pdf', 'max:5120'],
+            'page_2_html' => ['nullable', 'string'],
         ]);
 
         $data['code'] = strtoupper(trim($data['code']));
@@ -62,14 +65,23 @@ class CertificateTemplateController extends Controller
             $filePath = $upload->store('certificate-templates', 'public');
         }
 
+        // upload page 2 background
+        $page2FilePath = null;
+        $upload2 = $request->file('page_2_background');
+        if ($upload2) {
+            $page2FilePath = $upload2->store('certificate-templates', 'public');
+        }
+
         CertificateTemplate::create([
-            'name'        => $data['name'],
-            'code'        => $data['code'],
+            'name' => $data['name'],
+            'code' => $data['code'],
             'description' => $data['description'] ?? null,
-            'file_path'   => $filePath,
-            'is_active'   => $data['is_active'],
-            'settings'    => $settings,
-            'created_by'  => auth()->id(),
+            'file_path' => $filePath,
+            'page_2_background_path' => $page2FilePath,
+            'page_2_html' => $data['page_2_html'] ?? null,
+            'is_active' => $data['is_active'],
+            'settings' => $settings,
+            'created_by' => auth()->id(),
         ]);
 
         return redirect()
@@ -90,20 +102,22 @@ class CertificateTemplateController extends Controller
     public function update(Request $request, CertificateTemplate $template)
     {
         $data = $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
-            'code'        => ['required', 'string', 'max:50', Rule::unique('certificate_templates', 'code')->ignore($template->id)],
+            'name' => ['required', 'string', 'max:255'],
+            'code' => ['required', 'string', 'max:50', Rule::unique('certificate_templates', 'code')->ignore($template->id)],
             'description' => ['nullable', 'string'],
-            'is_active'   => ['nullable'],
-            'settings'    => ['nullable', 'json'],
+            'is_active' => ['nullable'],
+            'settings' => ['nullable', 'json'],
 
-            'file'        => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp,pdf', 'max:5120'],
-            'background'  => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp,pdf', 'max:5120'],
+            'file' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp,pdf', 'max:5120'],
+            'background' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp,pdf', 'max:5120'],
+            'page_2_background' => ['nullable', 'file', 'mimes:png,jpg,jpeg,webp,pdf', 'max:5120'],
+            'page_2_html' => ['nullable', 'string'],
         ]);
 
         $data['code'] = strtoupper(trim($data['code']));
         $isActive = $request->has('is_active')
             ? $request->boolean('is_active')
-            : (bool) $template->is_active;
+            : (bool)$template->is_active;
 
         $settings = $template->settings;
         if (array_key_exists('settings', $data)) {
@@ -122,13 +136,26 @@ class CertificateTemplateController extends Controller
             $filePath = $upload->store('certificate-templates', 'public');
         }
 
+        // file path lama page 2
+        $page2FilePath = $template->page_2_background_path;
+        $upload2 = $request->file('page_2_background');
+        if ($upload2) {
+            // hapus file lama kalau ada
+            if ($page2FilePath && Storage::disk('public')->exists($page2FilePath)) {
+                Storage::disk('public')->delete($page2FilePath);
+            }
+            $page2FilePath = $upload2->store('certificate-templates', 'public');
+        }
+
         $template->update([
-            'name'        => $data['name'],
-            'code'        => $data['code'],
+            'name' => $data['name'],
+            'code' => $data['code'],
             'description' => $data['description'] ?? null,
-            'file_path'   => $filePath,
-            'is_active'   => $isActive,
-            'settings'    => $settings,
+            'file_path' => $filePath,
+            'page_2_background_path' => $page2FilePath,
+            'page_2_html' => array_key_exists('page_2_html', $data) ? $data['page_2_html'] : $template->page_2_html,
+            'is_active' => $isActive,
+            'settings' => $settings,
         ]);
 
         return redirect()

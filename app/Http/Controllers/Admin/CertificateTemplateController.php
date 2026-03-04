@@ -12,19 +12,20 @@ class CertificateTemplateController extends Controller
 {
     public function index(Request $request)
     {
-        $q = trim((string) $request->query('q', ''));
+        $q = trim((string)$request->query('q', ''));
         $status = $request->query('status', ''); // active/inactive/all
 
         $templates = CertificateTemplate::query()
             ->when($q !== '', function ($qq) use ($q) {
-                $qq->where(function ($sub) use ($q) {
+            $qq->where(function ($sub) use ($q) {
                     $sub->where('name', 'like', "%{$q}%")
                         ->orWhere('code', 'like', "%{$q}%");
-                });
+                }
+                );
             })
-            ->when(in_array($status, ['active','inactive'], true), function ($qq) use ($status) {
-                $qq->where('is_active', $status === 'active');
-            })
+            ->when(in_array($status, ['active', 'inactive'], true), function ($qq) use ($status) {
+            $qq->where('is_active', $status === 'active');
+        })
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -40,20 +41,22 @@ class CertificateTemplateController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'        => ['required','string','max:255'],
-            'code'        => ['nullable','string','max:50','unique:certificate_templates,code'],
-            'description' => ['nullable','string'],
+            'name' => ['required', 'string', 'max:255'],
+            'code' => ['nullable', 'string', 'max:50', 'unique:certificate_templates,code'],
+            'description' => ['nullable', 'string'],
 
             // background optional
-            'background'  => ['nullable','file','mimes:png,jpg,jpeg,pdf','max:5120'],
+            'background' => ['nullable', 'file', 'mimes:png,jpg,jpeg,pdf', 'max:5120'],
+            'page_2_background' => ['nullable', 'file', 'mimes:png,jpg,jpeg,pdf', 'max:5120'],
+            'page_2_html' => ['nullable', 'string'],
 
             // setting basic
-            'paper_size'  => ['nullable','in:A4,A5,LETTER'],
-            'orientation' => ['nullable','in:landscape,portrait'],
-            'pos_name_x'  => ['nullable','integer','min:0','max:5000'],
-            'pos_name_y'  => ['nullable','integer','min:0','max:5000'],
-            'pos_qr_x'    => ['nullable','integer','min:0','max:5000'],
-            'pos_qr_y'    => ['nullable','integer','min:0','max:5000'],
+            'paper_size' => ['nullable', 'in:A4,A5,LETTER'],
+            'orientation' => ['nullable', 'in:landscape,portrait'],
+            'pos_name_x' => ['nullable', 'integer', 'min:0', 'max:5000'],
+            'pos_name_y' => ['nullable', 'integer', 'min:0', 'max:5000'],
+            'pos_qr_x' => ['nullable', 'integer', 'min:0', 'max:5000'],
+            'pos_qr_y' => ['nullable', 'integer', 'min:0', 'max:5000'],
         ]);
 
         $code = $data['code'] ?? null;
@@ -66,8 +69,13 @@ class CertificateTemplateController extends Controller
             $backgroundPath = $request->file('background')->store('templates', 'public');
         }
 
+        $page2BackgroundPath = null;
+        if ($request->hasFile('page_2_background')) {
+            $page2BackgroundPath = $request->file('page_2_background')->store('templates', 'public');
+        }
+
         $settings = [
-            'paper_size'  => $data['paper_size'] ?? 'A4',
+            'paper_size' => $data['paper_size'] ?? 'A4',
             'orientation' => $data['orientation'] ?? 'landscape',
             'pos' => [
                 'name' => [
@@ -82,13 +90,15 @@ class CertificateTemplateController extends Controller
         ];
 
         CertificateTemplate::create([
-            'name'            => $data['name'],
-            'code'            => $code,
-            'description'     => $data['description'] ?? null,
+            'name' => $data['name'],
+            'code' => $code,
+            'description' => $data['description'] ?? null,
             'background_path' => $backgroundPath,
-            'settings'        => $settings,
-            'is_active'       => true,
-            'created_by'      => auth()->id(),
+            'page_2_background_path' => $page2BackgroundPath,
+            'page_2_html' => $data['page_2_html'] ?? null,
+            'settings' => $settings,
+            'is_active' => true,
+            'created_by' => auth()->id(),
         ]);
 
         return redirect()->route('admin.templates.index')->with('success', 'Template berhasil dibuat.');
@@ -102,18 +112,20 @@ class CertificateTemplateController extends Controller
     public function update(Request $request, CertificateTemplate $template)
     {
         $data = $request->validate([
-            'name'        => ['required','string','max:255'],
-            'code'        => ['required','string','max:50','unique:certificate_templates,code,' . $template->id],
-            'description' => ['nullable','string'],
+            'name' => ['required', 'string', 'max:255'],
+            'code' => ['required', 'string', 'max:50', 'unique:certificate_templates,code,' . $template->id],
+            'description' => ['nullable', 'string'],
 
-            'background'  => ['nullable','file','mimes:png,jpg,jpeg,pdf','max:5120'],
+            'background' => ['nullable', 'file', 'mimes:png,jpg,jpeg,pdf', 'max:5120'],
+            'page_2_background' => ['nullable', 'file', 'mimes:png,jpg,jpeg,pdf', 'max:5120'],
+            'page_2_html' => ['nullable', 'string'],
 
-            'paper_size'  => ['nullable','in:A4,A5,LETTER'],
-            'orientation' => ['nullable','in:landscape,portrait'],
-            'pos_name_x'  => ['nullable','integer','min:0','max:5000'],
-            'pos_name_y'  => ['nullable','integer','min:0','max:5000'],
-            'pos_qr_x'    => ['nullable','integer','min:0','max:5000'],
-            'pos_qr_y'    => ['nullable','integer','min:0','max:5000'],
+            'paper_size' => ['nullable', 'in:A4,A5,LETTER'],
+            'orientation' => ['nullable', 'in:landscape,portrait'],
+            'pos_name_x' => ['nullable', 'integer', 'min:0', 'max:5000'],
+            'pos_name_y' => ['nullable', 'integer', 'min:0', 'max:5000'],
+            'pos_qr_x' => ['nullable', 'integer', 'min:0', 'max:5000'],
+            'pos_qr_y' => ['nullable', 'integer', 'min:0', 'max:5000'],
         ]);
 
         $backgroundPath = $template->background_path;
@@ -125,9 +137,17 @@ class CertificateTemplateController extends Controller
             $backgroundPath = $request->file('background')->store('templates', 'public');
         }
 
+        $page2BackgroundPath = $template->page_2_background_path;
+        if ($request->hasFile('page_2_background')) {
+            if ($page2BackgroundPath && Storage::disk('public')->exists($page2BackgroundPath)) {
+                Storage::disk('public')->delete($page2BackgroundPath);
+            }
+            $page2BackgroundPath = $request->file('page_2_background')->store('templates', 'public');
+        }
+
         $old = $template->settings ?? [];
         $settings = [
-            'paper_size'  => $data['paper_size'] ?? ($old['paper_size'] ?? 'A4'),
+            'paper_size' => $data['paper_size'] ?? ($old['paper_size'] ?? 'A4'),
             'orientation' => $data['orientation'] ?? ($old['orientation'] ?? 'landscape'),
             'pos' => [
                 'name' => [
@@ -142,11 +162,13 @@ class CertificateTemplateController extends Controller
         ];
 
         $template->update([
-            'name'            => $data['name'],
-            'code'            => $data['code'],
-            'description'     => $data['description'] ?? null,
+            'name' => $data['name'],
+            'code' => $data['code'],
+            'description' => $data['description'] ?? null,
             'background_path' => $backgroundPath,
-            'settings'        => $settings,
+            'page_2_background_path' => $page2BackgroundPath,
+            'page_2_html' => array_key_exists('page_2_html', $data) ? $data['page_2_html'] : $template->page_2_html,
+            'settings' => $settings,
         ]);
 
         return redirect()->route('admin.templates.index')->with('success', 'Template berhasil diperbarui.');

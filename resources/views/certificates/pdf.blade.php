@@ -7,19 +7,21 @@
     html, body { margin: 0; padding: 0; }
     body { font-family: DejaVu Sans, sans-serif; }
 
-    /* kanvas fixed agar posisi konsisten */
+    /* Kanvas relative agar posisi setiap field konsisten tapi tak berulang di next page */
     .page {
-      position: fixed;
-      left: 0; top: 0;
-      width: 1123px;   /* A4 landscape kira-kira @96dpi */
-      height: 794px;
+      position: relative;
+      width: 1122px;   /* A4 landscape kira-kira @96dpi (1122.5px x 793.7px) */
+      height: 793px;
       overflow: hidden;
+      display: block;
+      page-break-inside: avoid;
     }
 
     .field {
       position: absolute;
       white-space: normal;
       word-wrap: break-word;
+      line-height: 1.1; /* Mengurangi ruang kosong atas bawah teks agar tak saling tabrak */
     }
   </style>
 </head>
@@ -44,6 +46,22 @@
   // helper getter aman
   $get = function($arr, $key, $default = null) {
     return (is_array($arr) && array_key_exists($key, $arr)) ? $arr[$key] : $default;
+  };
+
+  // helper Auto-Resize Font untuk menghindari Overlap (Teks Bertumpuk)
+  $getFontSize = function($text, $config, $defaultSize) use ($get) {
+      $baseSize = (float)$get($config, 'font', $defaultSize);
+      $width = (float)$get($config, 'w', 1123);
+      
+      // Estimasi lebar dalam pixel (Karakter font berasumsi mengambil ~65% dari ukurannya agar lebih aman bagi teks kapital tebal)
+      $estimatedWidth = mb_strlen(trim(strip_tags((string)$text))) * ($baseSize * 0.65);
+      
+      // Jika diprediksi kepanjangan melebihi batas kotak 95%, kita paksa perkecil Font-nya
+      if ($estimatedWidth > ($width * 0.95) && $estimatedWidth > 0) {
+          $newSize = $baseSize * (($width * 0.95) / $estimatedWidth);
+          return max($newSize, 12); // Paling mini jangan kurang dari 12px
+      }
+      return $baseSize;
   };
 
   // ambil config per field (boleh kosong)
@@ -86,19 +104,19 @@
   {{-- BACKGROUND --}}
   @if($bgAbs && file_exists($bgAbs))
     <img src="{{ $bgAbs }}"
-         style="position:absolute; left:0; top:0; width:1123px; height:794px; z-index:-1;">
+         style="position:absolute; left:0; top:0; width:1122px; height:793px; z-index:-1;">
   @endif
 
   {{-- 1) NOMOR SERTIFIKAT --}}
   <div class="field"
        style="
-         left: {{ (int)$get($fNumber,'x',0) }}px;
-         top: {{ (int)$get($fNumber,'y',0) }}px;
-         width: {{ (int)$get($fNumber,'w',1123) }}px;
-         font-size: {{ (int)$get($fNumber,'font',16) }}px;
-         color: {{ $get($fNumber,'color','#111111') }};
-         text-align: {{ $get($fNumber,'align','center') }};
-         font-weight: {{ $get($fNumber,'weight','600') }};
+         left: {{ (int)$get($fNumber,'x') }}px;
+         top: {{ (int)$get($fNumber,'y') }}px;
+         width: {{ (int)$get($fNumber,'w') }}px;
+         font-size: {{ $getFontSize($numberText, $fNumber, 16) }}px;
+         color: {{ $get($fNumber,'color') }};
+         text-align: {{ $get($fNumber,'align') }};
+         font-weight: {{ $get($fNumber,'weight') }};
        ">
     {{ $numberText }}
   </div>
@@ -106,13 +124,14 @@
   {{-- 2) NAMA --}}
   <div class="field"
        style="
-         left: {{ (int)$get($fName,'x',0) }}px;
-         top: {{ (int)$get($fName,'y',0) }}px;
-         width: {{ (int)$get($fName,'w',1123) }}px;
-         font-size: {{ (int)$get($fName,'font',48) }}px;
-         color: {{ $get($fName,'color','#0b5fa8') }};
-         text-align: {{ $get($fName,'align','center') }};
-         font-weight: {{ $get($fName,'weight','700') }};
+         left: {{ (int)$get($fName,'x') }}px;
+         top: {{ (int)$get($fName,'y') }}px;
+         width: {{ (int)$get($fName,'w') }}px;
+         font-size: {{ $getFontSize($nameText, $fName, 48) }}px;
+         color: {{ $get($fName,'color') }};
+         text-align: {{ $get($fName,'align') }};
+         font-weight: {{ $get($fName,'weight') }};
+         white-space: nowrap;
        ">
     {{ $nameText }}
   </div>
@@ -120,13 +139,14 @@
   {{-- 3) NAMA KEGIATAN --}}
   <div class="field"
        style="
-         left: {{ (int)$get($fEvent,'x',0) }}px;
-         top: {{ (int)$get($fEvent,'y',0) }}px;
-         width: {{ (int)$get($fEvent,'w',1123) }}px;
-         font-size: {{ (int)$get($fEvent,'font',20) }}px;
-         color: {{ $get($fEvent,'color','#0b5fa8') }};
-         text-align: {{ $get($fEvent,'align','center') }};
-         font-weight: {{ $get($fEvent,'weight','400') }};
+         left: {{ (int)$get($fEvent,'x') }}px;
+         top: {{ (int)$get($fEvent,'y') }}px;
+         width: {{ (int)$get($fEvent,'w') }}px;
+         font-size: {{ $getFontSize($eventText, $fEvent, 20) }}px;
+         color: {{ $get($fEvent,'color') }};
+         text-align: {{ $get($fEvent,'align') }};
+         font-weight: {{ $get($fEvent,'weight') }};
+         white-space: nowrap;
        ">
     {{ $eventText }}
   </div>
@@ -135,13 +155,13 @@
   @if($descText !== '')
     <div class="field"
          style="
-           left: {{ (int)$get($fDesc,'x',120) }}px;
-           top: {{ (int)$get($fDesc,'y',450) }}px;
-           width: {{ (int)$get($fDesc,'w',880) }}px;
-           font-size: {{ (int)$get($fDesc,'font',16) }}px;
-           color: {{ $get($fDesc,'color','#111111') }};
-           text-align: {{ $get($fDesc,'align','justify') }};
-           font-weight: {{ $get($fDesc,'weight','400') }};
+           left: {{ (int)$get($fDesc,'x') }}px;
+           top: {{ (int)$get($fDesc,'y') }}px;
+           width: {{ (int)$get($fDesc,'w') }}px;
+           font-size: {{ $getFontSize($descText, $fDesc, 16) }}px;
+           color: {{ $get($fDesc,'color') }};
+           text-align: {{ $get($fDesc,'align') }};
+           font-weight: {{ $get($fDesc,'weight') }};
          ">
       {{ $descText }}
     </div>
@@ -151,17 +171,55 @@
   @if($dateText !== '')
     <div class="field"
          style="
-           left: {{ (int)$get($fDate,'x',0) }}px;
-           top: {{ (int)$get($fDate,'y',567) }}px;
-           width: {{ (int)$get($fDate,'w',1123) }}px;
-           font-size: {{ (int)$get($fDate,'font',16) }}px;
-           color: {{ $get($fDate,'color','#111111') }};
-           text-align: {{ $get($fDate,'align','center') }};
-           font-weight: {{ $get($fDate,'weight','500') }};
+           left: {{ (int)$get($fDate,'x') }}px;
+           top: {{ (int)$get($fDate,'y') }}px;
+           width: {{ (int)$get($fDate,'w') }}px;
+           font-size: {{ $getFontSize($dateText, $fDate, 16) }}px;
+           color: {{ $get($fDate,'color') }};
+           text-align: {{ $get($fDate,'align') }};
+           font-weight: {{ $get($fDate,'weight') }};
          ">
       {{ $dateText }}
     </div>
   @endif
 </div>
+
+@if(!empty($template->page_2_html))
+  @php
+      // Eksekusi replace {{ key }} dengan database kolom atau metadara
+      $page2Content = $template->page_2_html;
+      $metadata = is_array($participant->metadata) ? $participant->metadata : [];
+      
+      // Mengubah string statis {{ nama_kolom }} menjadi data aslinya
+      foreach ($metadata as $key => $val) {
+          $page2Content = str_replace('{{ ' . $key . ' }}', $val ?? '', $page2Content);
+          $page2Content = str_replace('{{' . $key . '}}', $val ?? '', $page2Content); // tanpa spasi
+          
+          // support old style {key}
+          $page2Content = str_replace('{' . $key . '}', $val ?? '', $page2Content);
+      }
+      
+      // Fallback untuk var default
+      $page2Content = str_replace('{{ name }}', $nameText, $page2Content);
+      $page2Content = str_replace('{{ nik }}', $participant->nik ?? '-', $page2Content);
+      $page2Content = str_replace('{{ institution }}', $participant->institution ?? '-', $page2Content);
+      $page2Content = str_replace('{{ daerah }}', $participant->daerah ?? '-', $page2Content);
+      $page2Content = str_replace('{{ jenjang }}', $participant->jenjang ?? '-', $page2Content);
+      $page2Content = str_replace('{{ peran }}', $participant->peran ?? '-', $page2Content);
+      $page2Content = str_replace('{{ keterangan }}', $participant->keterangan ?? '-', $page2Content);
+  @endphp
+
+  <div class="page" style="page-break-before: always; position: relative;">
+    {{-- BACKGROUND PAGE 2 --}}
+    @if(!empty($bgDataUri2))
+      <img src="{{ $bgDataUri2 }}" style="position:absolute; left:0; top:0; width:1122px; height:793px; z-index:-1;">
+    @endif
+    
+    <div style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; padding: 50px; box-sizing: border-box; z-index: 10;">
+        {!! $page2Content !!}
+    </div>
+  </div>
+@endif
+
 </body>
 </html>

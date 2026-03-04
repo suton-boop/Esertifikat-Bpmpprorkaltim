@@ -7,7 +7,7 @@
     <h4 class="mb-0">Edit Event</h4>
     <div class="text-muted">Ubah data event.</div>
   </div>
-  <a href="{{ route('admin.events.index') }}" class="btn btn-outline-secondary rounded-3">Kembali</a>
+  <a href="{{ route('admin.system.events.index') }}" class="btn btn-outline-secondary rounded-3">Kembali</a>
 </div>
 
 @if ($errors->any())
@@ -21,7 +21,7 @@
   </div>
 @endif
 
-<form method="POST" action="{{ route('admin.events.update', $event->id) }}" class="card border-0 shadow-sm rounded-4">
+<form method="POST" action="{{ route('admin.system.events.update', $event->id) }}" class="card border-0 shadow-sm rounded-4">
   @csrf
   @method('PATCH')
 

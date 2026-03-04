@@ -10,27 +10,29 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use App\Jobs\GenerateCertificatePdfJob;
 
 class CertificateController extends Controller
 {
     public function index(Request $request)
     {
         $eventId = $request->query('event_id');
-        $q       = trim((string) $request->query('q', ''));
-        $status  = trim((string) $request->query('status', ''));
+        $q = trim((string)$request->query('q', ''));
+        $status = trim((string)$request->query('status', ''));
 
         $events = Event::orderBy('name')->get();
 
         $participants = Participant::query()
             ->with('event')
-            ->when($eventId, fn ($qq) => $qq->where('event_id', $eventId))
+            ->when($eventId, fn($qq) => $qq->where('event_id', $eventId))
             ->when($q !== '', function ($qq) use ($q) {
-                $qq->where(function ($sub) use ($q) {
+            $qq->where(function ($sub) use ($q) {
                     $sub->where('name', 'like', "%{$q}%")
                         ->orWhere('email', 'like', "%{$q}%")
                         ->orWhere('nik', 'like', "%{$q}%")
                         ->orWhere('institution', 'like', "%{$q}%");
-                });
+                }
+                );
             })
             ->latest()
             ->paginate(10)
@@ -40,13 +42,118 @@ class CertificateController extends Controller
         if ($participants->count() > 0) {
             $certMap = Certificate::query()
                 ->whereIn('participant_id', $participants->pluck('id'))
-                ->when($eventId, fn ($qq) => $qq->where('event_id', $eventId))
-                ->when($status !== '', fn ($qq) => $qq->where('status', $status))
+                ->when($eventId, fn($qq) => $qq->where('event_id', $eventId))
+                ->when($status !== '', fn($qq) => $qq->where('status', $status))
                 ->get()
-                ->keyBy(fn ($c) => $c->event_id . ':' . $c->participant_id);
+                ->keyBy(fn($c) => $c->event_id . ':' . $c->participant_id);
         }
 
         return view('certificates.index', compact('events', 'eventId', 'q', 'status', 'participants', 'certMap'));
+    }
+
+    public function published(Request $request)
+    {
+        $eventId = $request->query('event_id');
+        $q = trim((string)$request->query('q', ''));
+
+        $events = Event::orderBy('name')->get();
+
+        $certificates = Certificate::query()
+            ->with(['event', 'participant'])
+            ->whereIn('status', [Certificate::STATUS_SIGNED, 'terbit', Certificate::STATUS_SENT]) // include terbit and signed logic
+            ->when($eventId, fn($qq) => $qq->where('event_id', $eventId))
+            ->when($q !== '', function ($qq) use ($q) {
+            $qq->whereHas('participant', function ($sub) use ($q) {
+                    $sub->where('name', 'like', "%{$q}%")
+                        ->orWhere('email', 'like', "%{$q}%")
+                        ->orWhere('nik', 'like', "%{$q}%")
+                        ->orWhere('institution', 'like', "%{$q}%");
+                }
+                )->orWhere('certificate_number', 'like', "%{$q}%");
+            })
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return view('certificates.published', compact('events', 'eventId', 'q', 'certificates'));
+    }
+
+    public function exportPublished(Request $request)
+    {
+        $eventId = $request->query('event_id');
+        $q = trim((string)$request->query('q', ''));
+
+        $query = Certificate::query()
+            ->with(['event', 'participant'])
+            ->whereIn('status', [Certificate::STATUS_SIGNED, 'terbit', Certificate::STATUS_SENT])
+            ->when($eventId, fn($qq) => $qq->where('event_id', $eventId))
+            ->when($q !== '', function ($qq) use ($q) {
+            $qq->whereHas('participant', function ($sub) use ($q) {
+                    $sub->where('name', 'like', "%{$q}%")
+                        ->orWhere('email', 'like', "%{$q}%")
+                        ->orWhere('nik', 'like', "%{$q}%")
+                        ->orWhere('institution', 'like', "%{$q}%");
+                }
+                )->orWhere('certificate_number', 'like', "%{$q}%");
+            })
+            ->latest();
+
+        $certificates = $query->get();
+
+        $fileName = 'export-sertifikat-terbit-' . date('Ymd_His') . '.xls';
+
+        $headers = [
+            "Content-type" => "application/vnd.ms-excel",
+            "Content-Disposition" => "attachment; filename=\"$fileName\"",
+            "Pragma" => "no-cache",
+            "Cache-Control" => "must-revalidate, post-check=0, pre-check=0",
+            "Expires" => "0"
+        ];
+
+        $callback = function () use ($certificates) {
+            // Kita menggunakan format tabel HTML berstruktur agar otomatis 
+            // diformat oleh Microsoft Excel dengan baik dan mendeteksi <a href>.
+            echo '<html xmlns:x="urn:schemas-microsoft-com:office:excel">';
+            echo '<head><meta http-equiv="content-type" content="application/vnd.ms-excel; charset=UTF-8"></head>';
+            echo '<body>';
+            echo '<table border="1">';
+            echo '<tr>
+                    <th style="background-color:#dcdcdc;">No</th>
+                    <th style="background-color:#dcdcdc;">Nomor Sertifikat</th>
+                    <th style="background-color:#dcdcdc;">Peserta (Nama)</th>
+                    <th style="background-color:#dcdcdc;">Email</th>
+                    <th style="background-color:#dcdcdc;">Instansi</th>
+                    <th style="background-color:#dcdcdc;">Event/Program</th>
+                    <th style="background-color:#dcdcdc;">Tanggal Terbit (Signed At)</th>
+                    <th style="background-color:#dcdcdc;">Link Unduhan Publik</th>
+                  </tr>';
+
+            $no = 1;
+            foreach ($certificates as $cert) {
+                $publicLink = $cert->verify_token ? route('public.verify.show', $cert->verify_token) : '';
+                $linkActive = $publicLink ? '<a href="' . $publicLink . '" target="_blank">' . $publicLink . '</a>' : '-';
+
+                // Mengakali nomor sertifikat agar otomatis terbaca sebagai text, tidak jadi e-science
+                $nomor = $cert->certificate_number ?? '-';
+
+                echo '<tr>';
+                echo '<td>' . $no++ . '</td>';
+                echo '<td style="mso-number-format:\'@\'">' . $nomor . '</td>';
+                echo '<td>' . htmlspecialchars($cert->participant->name ?? '-') . '</td>';
+                echo '<td>' . htmlspecialchars($cert->participant->email ?? '-') . '</td>';
+                echo '<td>' . htmlspecialchars($cert->participant->institution ?? '-') . '</td>';
+                echo '<td>' . htmlspecialchars($cert->event->name ?? '-') . '</td>';
+                echo '<td>' . ($cert->signed_at ? $cert->signed_at->format('Y-m-d H:i') : '-') . '</td>';
+                echo '<td>' . $linkActive . '</td>';
+                echo '</tr>';
+            }
+
+            echo '</table>';
+            echo '</body>';
+            echo '</html>';
+        };
+
+        return response()->stream($callback, 200, $headers);
     }
 
     /**
@@ -58,9 +165,9 @@ class CertificateController extends Controller
             'event_id' => ['required', 'integer', 'exists:events,id'],
         ]);
 
-        $eventId = (int) $data['event_id'];
+        $eventId = (int)$data['event_id'];
 
-        if ((int) $participant->event_id !== $eventId) {
+        if ((int)$participant->event_id !== $eventId) {
             return back()->with('error', 'Peserta tidak sesuai dengan event yang dipilih.');
         }
 
@@ -70,7 +177,7 @@ class CertificateController extends Controller
             return back()->with('error', 'Event belum memilih Template Sertifikat.');
         }
 
-        if (!(bool) $event->certificateTemplate->is_active) {
+        if (!(bool)$event->certificateTemplate->is_active) {
             return back()->with('error', 'Template sertifikat untuk event ini Nonaktif. Aktifkan dulu.');
         }
 
@@ -86,11 +193,11 @@ class CertificateController extends Controller
         }
 
         Certificate::create([
-            'event_id'       => $eventId,
+            'event_id' => $eventId,
             'participant_id' => $participant->id,
-            'status'         => Certificate::STATUS_DRAFT,
-            'verify_token'   => $this->makeVerifyToken(),
-            'created_by'     => auth()->id(),
+            'status' => Certificate::STATUS_DRAFT,
+            'verify_token' => $this->makeVerifyToken(),
+            'created_by' => auth()->id(),
         ]);
 
         return back()->with('success', "Draft dibuat untuk {$participant->name}.");
@@ -105,7 +212,7 @@ class CertificateController extends Controller
             'event_id' => ['required', 'integer', 'exists:events,id'],
         ]);
 
-        $eventId = (int) $data['event_id'];
+        $eventId = (int)$data['event_id'];
 
         $event = Event::with('certificateTemplate')->findOrFail($eventId);
 
@@ -113,7 +220,7 @@ class CertificateController extends Controller
             return back()->with('error', 'Event belum memilih Template Sertifikat.');
         }
 
-        if (!(bool) $event->certificateTemplate->is_active) {
+        if (!(bool)$event->certificateTemplate->is_active) {
             return back()->with('error', 'Template sertifikat untuk event ini Nonaktif. Aktifkan dulu.');
         }
 
@@ -133,14 +240,15 @@ class CertificateController extends Controller
 
         DB::transaction(function () use ($participants, $eventId, &$created, $existingLookup) {
             foreach ($participants as $p) {
-                if (isset($existingLookup[$p->id])) continue;
+                if (isset($existingLookup[$p->id]))
+                    continue;
 
                 Certificate::create([
-                    'event_id'       => $eventId,
+                    'event_id' => $eventId,
                     'participant_id' => $p->id,
-                    'status'         => Certificate::STATUS_DRAFT,
-                    'verify_token'   => $this->makeVerifyToken(),
-                    'created_by'     => auth()->id(),
+                    'status' => Certificate::STATUS_DRAFT,
+                    'verify_token' => $this->makeVerifyToken(),
+                    'created_by' => auth()->id(),
                 ]);
 
                 $created++;
@@ -153,7 +261,7 @@ class CertificateController extends Controller
     /**
      * Generate PDF FINAL hanya setelah APPROVED
      */
-    public function generatePdfOne(Request $request, Certificate $certificate, CertificatePdfService $pdfService)
+    public function generatePdfOne(Request $request, Certificate $certificate)
     {
         try {
             if ($certificate->status !== Certificate::STATUS_APPROVED) {
@@ -164,30 +272,25 @@ class CertificateController extends Controller
                 return back()->with('error', 'Nomor sertifikat belum dikunci. Approve dulu.');
             }
 
-            $path = $pdfService->generatePdf($certificate);
+            GenerateCertificatePdfJob::dispatch($certificate);
 
-            $certificate->update([
-                'pdf_path'     => $path,
-                'status'       => Certificate::STATUS_FINAL_GENERATED,
-                'generated_at' => now(),
-            ]);
-
-            return back()->with('success', 'PDF final sertifikat berhasil dibuat.');
-        } catch (\Throwable $e) {
-            return back()->with('error', 'Gagal generate PDF: ' . $e->getMessage());
+            return back()->with('success', 'Perintah pembuatan PDF Certificate telah dimasukkan ke dalam antrean (Queue). Silakan refresh halaman beberapa saat lagi.');
+        }
+        catch (\Throwable $e) {
+            return back()->with('error', 'Gagal memproses ke antrean: ' . $e->getMessage());
         }
     }
 
     /**
      * Generate PDF FINAL massal hanya APPROVED
      */
-    public function generatePdfAll(Request $request, CertificatePdfService $pdfService)
+    public function generatePdfAll(Request $request)
     {
         $data = $request->validate([
             'event_id' => ['required', 'integer', 'exists:events,id'],
         ]);
 
-        $eventId = (int) $data['event_id'];
+        $eventId = (int)$data['event_id'];
 
         $certs = Certificate::where('event_id', $eventId)
             ->where('status', Certificate::STATUS_APPROVED)
@@ -197,51 +300,41 @@ class CertificateController extends Controller
             return back()->with('error', 'Tidak ada sertifikat APPROVED untuk dibuatkan PDF.');
         }
 
-        $ok = 0; $fail = 0;
-
+        $dispatched = 0;
         foreach ($certs as $c) {
-            try {
-                if (!$c->certificate_number || !$c->year || !$c->sequence) {
-                    $fail++;
-                    continue;
-                }
-
-                $path = $pdfService->generatePdf($c);
-
-                $c->update([
-                    'pdf_path'     => $path,
-                    'status'       => Certificate::STATUS_FINAL_GENERATED,
-                    'generated_at' => now(),
-                ]);
-
-                $ok++;
-            } catch (\Throwable $e) {
-                $fail++;
+            if (!$c->certificate_number || !$c->year || !$c->sequence) {
+                continue;
             }
+
+            GenerateCertificatePdfJob::dispatch($c);
+            $dispatched++;
         }
 
-        return back()->with('success', "Generate PDF final selesai. Berhasil: {$ok}, Gagal: {$fail}");
+        return back()->with('success', "{$dispatched} Sertifikat telah dimasukkan ke dalam antrean (Background Job). Proses sedang berjalan di balik layar.");
     }
 
     public function preview(Certificate $certificate)
     {
-        $pdfPath = $this->normalizePdfPath($certificate->pdf_path);
+        $pdfPath = $this->normalizePdfPath($certificate->signed_pdf_path ?: $certificate->pdf_path);
 
-        if (!$pdfPath) return back()->with('error', 'PDF belum tersedia.');
+        if (!$pdfPath)
+            return back()->with('error', 'PDF belum tersedia.');
         if (!Storage::disk('public')->exists($pdfPath)) {
             return back()->with('error', 'File PDF tidak ditemukan di storage/public.');
         }
 
         return response()->file(Storage::disk('public')->path($pdfPath), [
             'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="sertifikat.pdf"'
         ]);
     }
 
     public function download(Certificate $certificate)
     {
-        $pdfPath = $this->normalizePdfPath($certificate->pdf_path);
+        $pdfPath = $this->normalizePdfPath($certificate->signed_pdf_path ?: $certificate->pdf_path);
 
-        if (!$pdfPath) return back()->with('error', 'PDF belum tersedia.');
+        if (!$pdfPath)
+            return back()->with('error', 'PDF belum tersedia.');
         if (!Storage::disk('public')->exists($pdfPath)) {
             return back()->with('error', 'File PDF tidak ditemukan di storage/public.');
         }
@@ -255,7 +348,7 @@ class CertificateController extends Controller
     private function makeVerifyToken(): string
     {
         do {
-            $token = (string) Str::uuid();
+            $token = (string)Str::uuid();
         } while (Certificate::where('verify_token', $token)->exists());
 
         return $token;
@@ -263,8 +356,9 @@ class CertificateController extends Controller
 
     private function normalizePdfPath(?string $path): ?string
     {
-        $path = trim((string) $path);
-        if ($path === '') return null;
+        $path = trim((string)$path);
+        if ($path === '')
+            return null;
 
         $path = preg_replace('#^storage/#', '', $path);
         $path = preg_replace('#^public/#', '', $path);
@@ -273,5 +367,6 @@ class CertificateController extends Controller
         return $path;
     }
 
- 
+
+
 }

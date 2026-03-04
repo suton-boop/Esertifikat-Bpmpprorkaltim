@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
 class SignerCertificate extends Model
 {
+    use HasUuids;
+
     protected $table = 'signer_certificates';
+    protected $keyType = 'string';
+    public $incrementing = false;
 
     protected $fillable = [
         'code',
@@ -21,9 +26,9 @@ class SignerCertificate extends Model
     ];
 
     protected $casts = [
-        'is_active'  => 'boolean',
+        'is_active' => 'boolean',
         'valid_from' => 'datetime',
-        'valid_to'   => 'datetime',
-        'meta'       => 'array',
+        'valid_to' => 'datetime',
+        'meta' => 'array',
     ];
 }

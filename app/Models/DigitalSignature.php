@@ -29,24 +29,27 @@ class DigitalSignature extends Model
         'signed_user_agent',
 
         // appearance
-        'appearance_mode',
-        'appearance_page',
-        'appearance_x',
-        'appearance_y',
-        'appearance_w',
-        'appearance_h',
-        'appearance_reason',
-        'appearance_location',
+        'is_visible',
+        'placement_mode',
+        'page',
+        'pos_x',
+        'pos_y',
+        'width',
+        'height',
+        'sign_reason',
+        'sign_location',
+        'signature_image_path',
     ];
 
     protected $casts = [
         'tsa_enabled' => 'boolean',
-        'tsa_at'      => 'datetime',
-        'signed_at'   => 'datetime',
-        'appearance_page' => 'integer',
-        'appearance_x'    => 'integer',
-        'appearance_y'    => 'integer',
-        'appearance_w'    => 'integer',
-        'appearance_h'    => 'integer',
+        'tsa_at' => 'datetime',
+        'signed_at' => 'datetime',
+        'is_visible' => 'boolean',
+        'page' => 'integer',
+        'pos_x' => 'integer',
+        'pos_y' => 'integer',
+        'width' => 'integer',
+        'height' => 'integer',
     ];
 }

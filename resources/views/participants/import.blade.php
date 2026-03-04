@@ -10,12 +10,12 @@
 <div class="d-flex flex-wrap justify-content-between align-items-start gap-2 mb-3">
   <div>
     <h4 class="mb-0">Import Peserta</h4>
-    <div class="text-muted">Upload CSV untuk menambahkan peserta per event.</div>
+    <div class="text-muted">Upload berkas Excel (.xlsx) atau CSV untuk menambahkan peserta per event.</div>
   </div>
 
   <div class="d-flex gap-2">
-    <a href="{{ route('admin.participants.template') }}" class="btn btn-outline-primary rounded-3">
-    <i class="fa-solid fa-download me-1"></i> Template CSV
+    <a href="{{ route('admin.participants.template') }}" class="btn btn-outline-success rounded-3">
+    <i class="fa-solid fa-file-excel me-1"></i> Template Excel
     </a>
 
     <a href="{{ route('admin.participants.index', ['event_id' => $eventId]) }}" class="btn btn-outline-secondary rounded-3">
@@ -41,11 +41,11 @@
 <div class="card border-0 shadow-sm rounded-4">
   <div class="card-body">
     <div class="alert alert-info">
-      <div class="fw-semibold mb-1">Format CSV</div>
+      <div class="fw-semibold mb-1">Format Kolom Excel / CSV</div>
       <div class="small">
-        Header yang tersedia: <code>name</code> (wajib),
+        Header dari baris pertama harus berisi: <code>name</code> (wajib),
         <code>email</code>, <code>nik</code>, <code>institution</code>, <code>status</code> (draft/terbit).<br>
-        Gunakan tombol <b>Template CSV</b> untuk contoh format.
+        Gunakan tombol <b>Template Excel</b> di atas untuk contoh struktur format kolom.
       </div>
     </div>
 
@@ -67,14 +67,14 @@
         </div>
 
         <div class="col-md-6">
-          <label class="form-label">File CSV <span class="text-danger">*</span></label>
+          <label class="form-label">File Excel / CSV <span class="text-danger">*</span></label>
           <input type="file"
                  name="file"
-                 accept=".csv,.txt"
+                 accept=".xlsx,.xls,.csv,.txt"
                  class="form-control @error('file') is-invalid @enderror"
                  required>
           @error('file') <div class="invalid-feedback">{{ $message }}</div> @enderror
-          <div class="form-text">Maks 5MB. Disarankan CSV UTF-8 (template sudah UTF-8 BOM untuk Excel).</div>
+          <div class="form-text">Maks 5MB. Gunakan format file .xlsx (Microsoft Excel) atau .csv</div>
         </div>
       </div>
 

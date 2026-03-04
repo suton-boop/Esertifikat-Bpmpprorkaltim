@@ -122,8 +122,13 @@
 
             <td class="fw-semibold">
               {{ $p->name }}
-              @if($p->institution)
-                <div class="text-muted small">{{ $p->institution }}</div>
+              <div class="text-muted small">
+                {{ $p->institution ?? '' }}
+                @if($p->jenjang) - {{ $p->jenjang }} @endif
+                @if($p->daerah) ({{ $p->daerah }}) @endif
+              </div>
+              @if($p->peran)
+                <span class="badge bg-light text-dark border small mt-1">{{ $p->peran }}</span>
               @endif
             </td>
 

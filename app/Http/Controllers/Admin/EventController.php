@@ -11,21 +11,22 @@ class EventController extends Controller
 {
     public function index(Request $request)
     {
-        $q = trim((string) $request->query('q', ''));
+        $q = trim((string)$request->query('q', ''));
         $status = $request->query('status');
 
         $events = Event::query()
-            ->with(['certificateTemplate'])      // tampilkan template di list (opsional)
+            ->with(['certificateTemplate']) // tampilkan template di list (opsional)
             ->withCount('participants')
             ->when($q !== '', function ($query) use ($q) {
-                $query->where(function ($sub) use ($q) {
+            $query->where(function ($sub) use ($q) {
                     $sub->where('name', 'like', "%{$q}%")
                         ->orWhere('location', 'like', "%{$q}%");
-                });
+                }
+                );
             })
             ->when(in_array($status, ['draft', 'active', 'closed'], true), function ($query) use ($status) {
-                $query->where('status', $status);
-            })
+            $query->where('status', $status);
+        })
             ->latest()
             ->paginate(10)
             ->withQueryString();
@@ -47,11 +48,11 @@ class EventController extends Controller
     public function store(Request $request)
     {
         $data = $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
-            'location'    => ['nullable', 'string', 'max:255'],
-            'start_date'  => ['required', 'date'],
-            'end_date'    => ['nullable', 'date', 'after_or_equal:start_date'],
-            'status'      => ['required', 'in:draft,active,closed'],
+            'name' => ['required', 'string', 'max:255'],
+            'location' => ['nullable', 'string', 'max:255'],
+            'start_date' => ['required', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'status' => ['required', 'in:draft,active,closed'],
             'description' => ['nullable', 'string'],
 
             // pilih template
@@ -71,8 +72,6 @@ class EventController extends Controller
                 return back()->withInput()->with('error', 'Template yang dipilih sedang nonaktif.');
             }
         }
-
-        $data['created_by'] = auth()->id();
 
         Event::create($data);
 
@@ -95,11 +94,11 @@ class EventController extends Controller
     public function update(Request $request, Event $event)
     {
         $data = $request->validate([
-            'name'        => ['required', 'string', 'max:255'],
-            'location'    => ['nullable', 'string', 'max:255'],
-            'start_date'  => ['required', 'date'],
-            'end_date'    => ['nullable', 'date', 'after_or_equal:start_date'],
-            'status'      => ['required', 'in:draft,active,closed'],
+            'name' => ['required', 'string', 'max:255'],
+            'location' => ['nullable', 'string', 'max:255'],
+            'start_date' => ['required', 'date'],
+            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
+            'status' => ['required', 'in:draft,active,closed'],
             'description' => ['nullable', 'string'],
 
             'certificate_template_id' => ['nullable', 'integer', 'exists:certificate_templates,id'],
