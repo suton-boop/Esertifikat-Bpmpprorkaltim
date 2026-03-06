@@ -44,8 +44,8 @@ class ApprovalController extends Controller
 
             $nextSeq = ((int)$maxSeq) + 1;
 
-            $prefix = 'Sertifikat/BPMP.Kaltim/' . $year;
-            $no = str_pad((string)$nextSeq, 4, '0', STR_PAD_LEFT) . '/' . $prefix;
+            $prefix = 'Sertifikat/BPMPKALTIM/' . $year;
+            $no = str_pad((string)$nextSeq, 5, '0', STR_PAD_LEFT) . '/' . $prefix;
 
             $certificate->update([
                 'status' => Certificate::STATUS_APPROVED,
@@ -117,7 +117,7 @@ class ApprovalController extends Controller
 
             foreach ($certs as $c) {
                 $seq++;
-                $no = str_pad((string)$seq, 4, '0', STR_PAD_LEFT) . '/' . $prefix;
+                $no = str_pad((string)$seq, 5, '0', STR_PAD_LEFT) . '/' . $prefix;
 
                 $c->update([
                     'status' => Certificate::STATUS_APPROVED,

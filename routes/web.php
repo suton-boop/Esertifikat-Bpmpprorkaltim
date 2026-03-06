@@ -27,7 +27,17 @@ use App\Http\Controllers\Admin\Tte\SigningController;
 use App\Models\Certificate;
 
 /* |------------------------- | PUBLIK |------------------------- */
-Route::get('/', fn() => view('public.home'))->name('public.home');
+Route::get('/', function () {
+    $stats = [
+        'total_certificates' => \App\Models\Certificate::whereIn('status', [
+            \App\Models\Certificate::STATUS_SIGNED,
+            \App\Models\Certificate::STATUS_SENT,
+            \App\Models\Certificate::STATUS_FINAL_GENERATED
+        ])->count(),
+        'total_participants' => \App\Models\Participant::count(),
+    ];
+    return view('public.home', compact('stats'));
+})->name('public.home');
 
 Route::get('/verify', [PublicCertificateController::class , 'verifyForm'])->name('public.verify.form');
 Route::post('/verify', [PublicCertificateController::class , 'verifyByNumber'])->name('public.verify.process');

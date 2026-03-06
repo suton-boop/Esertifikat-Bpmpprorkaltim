@@ -7,25 +7,29 @@
 <div class="row justify-content-center">
     <div class="col-lg-10">
         
-        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 bg-white">
-            <div class="card-header border-0 py-3" style="background-color: transparent; border-bottom: 2px solid #f1f5f9 !important;">
-                <h6 class="mb-0 fw-bold text-center text-dark">Form untuk mencari data Sertifikat E-Sertifikat</h6>
-            </div>
-            <div class="card-body p-4 text-center">
-                <h5 class="fw-bold mb-4 text-dark">Ketik Nama atau NIK atau Email atau Unit Kerja kemudian tekan tombol Cari</h5>
+        <!-- Search Form Card -->
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5 bg-white" data-aos="fade-up">
+            <div class="card-body p-4 p-md-5 text-center">
+                <div class="mb-4">
+                    <h4 class="fw-bold text-dark mb-2">Cari Data Sertifikat</h4>
+                    <p class="text-muted">Masukkan Nama, NIK, Email, atau Unit Kerja untuk menemukan sertifikat Anda.</p>
+                </div>
                 
                 <form action="<?php echo e(route('public.search.process')); ?>" method="POST" class="d-flex justify-content-center">
                     <?php echo csrf_field(); ?>
-                    <div class="input-group input-group-lg shadow-sm" style="max-width: 650px;">
-                        <input type="text" name="keyword" class="form-control" style="border: 2px solid #e1e8ed;" placeholder="Tulis disini........" required autofocus value="<?php echo e($keyword ?? old('keyword', request('keyword'))); ?>">
-                        <button class="btn fw-semibold px-4 text-white" type="submit" style="background-color: #f0ad4e; border-color: #eea236; letter-spacing: 1px;">
-                            <i class="fa-solid fa-search me-1"></i> CARI
+                    <div class="input-group input-group-lg shadow-sm rounded-3 overflow-hidden" style="max-width: 700px; border: 1px solid #e2e8f0;">
+                        <span class="input-group-text bg-white border-0 ps-4 text-muted">
+                            <i class="fa-solid fa-magnifying-glass"></i>
+                        </span>
+                        <input type="text" name="keyword" class="form-control border-0 py-3" placeholder="Contoh: Budi Santoso" required autofocus value="<?php echo e($keyword ?? old('keyword', request('keyword'))); ?>">
+                        <button class="btn btn-primary px-4 fw-bold shadow-none" type="submit">
+                            CARI
                         </button>
                     </div>
                 </form>
 
                 <?php if(session('error')): ?>
-                    <div class="alert alert-danger mt-4 d-inline-block text-start mb-0">
+                    <div class="alert alert-danger mt-4 d-inline-block text-start mb-0 rounded-3 border-0 shadow-sm px-4">
                         <i class="fa-solid fa-circle-exclamation me-2"></i> <?php echo e(session('error')); ?>
 
                     </div>
@@ -35,50 +39,66 @@
 
         <?php if(isset($results)): ?>
             <?php if(count($results) === 0): ?>
-                <div class="alert alert-danger text-center p-4 rounded-3 shadow-sm border-0" style="background-color: #f8dede; color: #a94442;">
-                    <button type="button" class="btn-close float-end" onclick="this.parentElement.style.display='none'"></button>
-                    <h5 class="fw-normal mb-2 fs-4">Peringatan !</h5>
-                    <p class="mb-3">Data yang anda cari tidak ada atau keywordnya salah</p>
-                    <a href="<?php echo e(route('public.search')); ?>" class="btn btn-warning btn-sm text-white fw-bold px-3 rounded-2 shadow-sm" style="background-color: #f0ad4e; border-color: #eea236;">
-                        <i class="fa-solid fa-rotate-left me-1"></i> Kembali
+                <div class="alert alert-warning text-center p-5 rounded-4 shadow-sm border-0 bg-white" data-aos="zoom-in">
+                    <div class="mb-3">
+                        <i class="fa-solid fa-face-frown text-warning" style="font-size: 4rem;"></i>
+                    </div>
+                    <h4 class="fw-bold text-dark mb-2">Data Tidak Ditemukan</h4>
+                    <p class="text-muted mb-4">Maaf, data yang Anda cari tidak ada atau kata kunci yang dimasukkan salah.</p>
+                    <a href="<?php echo e(route('public.search')); ?>" class="btn btn-outline-primary fw-bold px-4 rounded-3">
+                        <i class="fa-solid fa-rotate-left me-2"></i> Coba Lagi
                     </a>
                 </div>
             <?php else: ?>
-                <div class="card border-0 shadow-sm rounded-3 overflow-hidden mt-4">
-                    <div class="card-header border-0 py-2" style="background-color: #dff0d8; color: #3c763d;">
-                        <h6 class="mb-0 fw-semibold">Hasil Pencarian</h6>
-                    </div>
+                <div class="mb-4 d-flex align-items-center justify-content-between" data-aos="fade-up">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="fa-solid fa-list-check me-2 text-primary"></i> Hasil Pencarian
+                    </h5>
+                    <span class="badge bg-light text-primary px-3 py-2 rounded-pill fw-bold border border-primary border-opacity-10">
+                        <?php echo e(count($results)); ?> Data Ditemukan
+                    </span>
+                </div>
+                
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-5" data-aos="fade-up">
                     <div class="table-responsive">
-                        <table class="table align-middle mb-0 table-bordered border-white">
-                            <thead class="text-dark fw-bold" style="background-color: #c4e300;">
+                        <table class="table align-middle mb-0">
+                            <thead class="bg-primary text-white">
                                 <tr>
-                                    <th width="5%" class="py-3 text-center border-0">No</th>
-                                    <th class="py-3 border-0">Nama</th>
-                                    <th class="py-3 border-0">Unit Kerja</th>
-                                    <th class="py-3 border-0">Kegiatan</th>
-                                    <th width="15%" class="py-3 text-center border-0">Unduh</th>
+                                    <th width="5%" class="py-3 text-center">No</th>
+                                    <th class="py-3">Nama Lengkap</th>
+                                    <th class="py-3">Unit Kerja / Instansi</th>
+                                    <th class="py-3">Kegiatan</th>
+                                    <th width="15%" class="py-3 text-center">Aksi</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody class="bg-white">
                                 <?php $__currentLoopData = $results; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $index => $cert): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                    <tr class="bg-white">
-                                        <td class="text-center fw-bold text-dark border-bottom"><?php echo e($index + 1); ?></td>
-                                        <td class="fw-semibold text-dark border-bottom"><?php echo e($cert->participant->name); ?></td>
-                                        <td class="text-dark border-bottom"><?php echo e($cert->participant->institution ?? '-'); ?></td>
-                                        <td class="text-dark border-bottom">
-                                            <?php echo e($cert->event->name); ?><br>
-                                            <span style="font-size: 13px;" class="text-secondary">
-                                                <?php echo e($cert->event->start_date ? \Carbon\Carbon::parse($cert->event->start_date)->translatedFormat('d M Y') : ''); ?>
-
-                                            </span>
+                                    <tr class="hover-row">
+                                        <td class="text-center fw-bold text-muted"><?php echo e($index + 1); ?></td>
+                                        <td>
+                                            <div class="fw-bold text-dark"><?php echo e($cert->participant->name); ?></div>
+                                            <div class="small text-muted"><?php echo e($cert->participant->email ?? ''); ?></div>
                                         </td>
-                                        <td class="text-center border-bottom">
+                                        <td>
+                                            <div class="text-dark"><?php echo e($cert->participant->institution ?? '-'); ?></div>
+                                        </td>
+                                        <td>
+                                            <div class="fw-semibold text-dark mb-1"><?php echo e($cert->event->name); ?></div>
+                                            <div class="small text-muted">
+                                                <i class="fa-regular fa-calendar-days me-1"></i>
+                                                <?php echo e($cert->event->start_date ? \Carbon\Carbon::parse($cert->event->start_date)->translatedFormat('d M Y') : '-'); ?>
+
+                                            </div>
+                                        </td>
+                                        <td class="text-center">
                                             <?php if($cert->pdf_path || $cert->signed_pdf_path): ?>
-                                                <a href="<?php echo e(route('public.download', $cert->verify_token)); ?>" target="_blank" class="btn btn-success btn-sm rounded-1 shadow-sm fw-semibold" style="background-color: #5cb85c; border-color: #4cae4c; font-size: 13px;">
-                                                    <i class="fa-solid fa-circle-down me-1"></i> CETAK SERTIFIKAT
+                                                <a href="<?php echo e(route('public.download', $cert->verify_token)); ?>" target="_blank" class="btn btn-sm btn-success rounded-3 px-3 fw-bold d-inline-flex align-items-center gap-1">
+                                                    <i class="fa-solid fa-download"></i> Cetak
                                                 </a>
                                             <?php else: ?>
-                                                <span class="badge bg-secondary">Proses TTE</span>
+                                                <span class="badge bg-light text-secondary px-3 py-2 rounded-pill fw-medium border border-secondary border-opacity-10">
+                                                    <i class="fa-solid fa-spinner fa-spin me-1"></i> Proses TTE
+                                                </span>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
@@ -92,6 +112,19 @@
 
     </div>
 </div>
+
+<style>
+    .hover-row {
+        transition: background-color 0.2s ease;
+    }
+    .hover-row:hover {
+        background-color: #f8fafc;
+    }
+    .input-group:focus-within {
+        border-color: var(--primary-color) !important;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15) !important;
+    }
+</style>
 <?php $__env->stopSection(); ?>
 
 <?php echo $__env->make('public.layout', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\esertifikatv1\resources\views/public/search.blade.php ENDPATH**/ ?>

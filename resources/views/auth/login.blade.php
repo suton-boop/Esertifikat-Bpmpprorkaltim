@@ -1,150 +1,231 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Login - E-Sertifikat</title>
-    <link rel="stylesheet" href="{{ asset('build/assets/app-VYkFtGlb.css') }}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .split-bg {
-            background: linear-gradient(135deg, #f6f8fd 0%, #f1f5f9 100%);
-        }
-        .brand-bg {
-            background: linear-gradient(135deg, #0d6efd 0%, #00b4db 100%);
-            position: relative;
-            overflow: hidden;
-        }
-        .brand-bg::after {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-        }
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255,255,255,0.8);
-            border-radius: 20px;
-        }
-        .input-icon-wrapper i {
-            transition: color 0.3s;
-        }
-        input:focus + .input-icon-wrapper i, input:focus ~ .input-icon-wrapper i {
-            color: #0d6efd;
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login - E-Sertifikat</title>
+
+@vite(['resources/css/app.css','resources/js/app.js'])
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+
+<style>
+
+body{
+background: linear-gradient(135deg,#eef4ff 0%,#f8fafc 60%,#e8f1ff 100%);
+font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+}
+
+.login-wrapper{
+min-height:100vh;
+display:flex;
+align-items:center;
+justify-content:center;
+padding:40px 20px;
+}
+
+.login-card{
+background:#ffffff;
+border-radius:28px;
+padding:50px 55px;
+max-width:700px;
+width:100%;
+box-shadow:
+0 30px 70px rgba(0,0,0,0.08),
+0 10px 25px rgba(0,0,0,0.05);
+}
+
+.logo-top{
+height:130px;
+object-fit:contain;
+margin-bottom:20px;
+}
+
+.title-login{
+font-size:40px;
+font-weight:800;
+color:#1e293b;
+}
+
+.subtitle-login{
+color:#64748b;
+font-size:18px;
+margin-top:6px;
+margin-bottom:35px;
+}
+
+.label-login{
+font-weight:600;
+color:#475569;
+margin-bottom:8px;
+}
+
+.input-box{
+position:relative;
+}
+
+.input-box i{
+position:absolute;
+left:16px;
+top:50%;
+transform:translateY(-50%);
+color:#94a3b8;
+}
+
+.input-field{
+width:100%;
+padding:14px 16px 14px 45px;
+border-radius:18px;
+border:1px solid #cbd5e1;
+font-size:16px;
+transition:0.25s;
+}
+
+.input-field:focus{
+outline:none;
+border-color:#3b82f6;
+box-shadow:0 0 0 4px rgba(59,130,246,.15);
+}
+
+.btn-login{
+margin-top:10px;
+width:100%;
+padding:15px;
+border:none;
+border-radius:20px;
+font-weight:700;
+font-size:17px;
+color:white;
+background:linear-gradient(135deg,#0d6efd,#00b4db);
+box-shadow:0 10px 20px rgba(13,110,253,.3);
+transition:.2s;
+}
+
+.btn-login:hover{
+transform:translateY(-2px);
+box-shadow:0 15px 30px rgba(13,110,253,.35);
+}
+
+.footer-login{
+text-align:center;
+margin-top:40px;
+color:#64748b;
+font-size:14px;
+}
+
+.footer-login img{
+height:55px;
+margin-bottom:10px;
+}
+
+</style>
 </head>
-<body class="antialiased min-h-screen flex split-bg text-slate-800">
 
-<div class="flex-1 flex" style="min-height: 100vh;">
-    <!-- Left: Branding -->
-    <div class="hidden lg:flex flex-col justify-between w-5/12 brand-bg text-white p-12">
-        <div class="z-10 relative">
-            <h1 class="text-4xl font-extrabold tracking-tight mb-4" style="line-height: 1.2;">E-Sertifikat<br/>BPMP Prov. Kaltim</h1>
-            <p class="text-lg opacity-90 max-w-sm font-light">
-                Sistem Layanan Dokumen dan Tanda Tangan Elektronik Terpadu untuk kemudahan distribusi sertifikat secara instan dan aman.
-            </p>
-        </div>
-        
-        <div class="z-10 relative mt-auto flex flex-col items-start gap-4">
-            <div class="glass-panel p-3 inline-block text-slate-800 shadow-xl">
-                <!-- LOGO RAMAH BERMUTU -->
-                <img src="{{ asset('images/ramah bermutu.png') }}" alt="Logo Pendidikan Bermutu Untuk Semua" class="h-12 lg:h-16 object-contain">
-            </div>
-            <div class="text-sm font-medium text-white opacity-90 leading-snug">
-                &copy; {{ date('Y') }} Kementerian Pendidikan Dasar dan Menengah<br>
-                Balai Penjaminan Mutu Pendidikan Provinsi Kalimantan Timur.
-            </div>
-        </div>
-        
-        <!-- Decoration -->
-        <div class="absolute -right-20 -bottom-20 opacity-10 z-0">
-             <i class="fa-solid fa-award" style="font-size: 35rem;"></i>
-        </div>
-    </div>
+<body>
 
-    <!-- Right: Form -->
-    <div class="w-full lg:w-7/12 flex items-center justify-center p-8 lg:p-24 relative">
-        <div class="max-w-md w-full">
-            <div class="mb-8 flex flex-col items-center text-center">
-                 <img src="{{ asset('images/logo-kemendikdasmen.png') }}" alt="Logo Kemendikdasmen BPMP Kaltim" class="max-w-[180px] h-auto mb-6 object-contain">
-                 <h2 class="text-3xl font-extrabold text-slate-900 mb-2">Selamat Datang 👋</h2>
-                 <p class="text-slate-500 font-medium">Silakan login menggunakan email dan kata sandi Anda untuk mengakses dashboard manajemen.</p>
-            </div>
+<div class="login-wrapper">
 
-            <!-- Session Status Error Messages (Breeze Components are not used here intentionally for better custom design) -->
-            @if(session('status'))
-                <div class="mb-5 p-4 rounded-xl bg-green-50 text-green-700 text-sm font-medium border border-green-200 flex items-center">
-                    <i class="fa-solid fa-circle-check mr-3 text-lg"></i> {{ session('status') }}
-                </div>
-            @endif
-            
-            @if($errors->any())
-                 <div class="mb-5 p-4 rounded-xl bg-red-50 text-red-700 text-sm font-medium border border-red-200 flex items-start">
-                    <i class="fa-solid fa-triangle-exclamation mr-3 mt-1 text-lg"></i>
-                    <ul class="list-disc pl-2">
-                        @foreach ($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
+<div class="login-card">
 
-            <form method="POST" action="{{ route('login') }}" class="space-y-6">
-                @csrf
+<div class="text-center flex flex-col items-center">
 
-                <!-- Email Address -->
-                <div>
-                    <label for="email" class="block text-sm font-semibold text-slate-700 mb-2">Email Anda</label>
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none input-icon-wrapper">
-                            <i class="fa-solid fa-envelope text-slate-400 group-focus-within:text-blue-600 transition-colors"></i>
-                        </div>
-                        <input id="email" type="email" name="email" value="{{ old('email') }}" required autofocus autocomplete="username"
-                            class="block w-full pl-11 pr-4 py-3 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white shadow-sm hover:border-slate-400" placeholder="contoh@kemdikbud.go.id">
-                    </div>
-                </div>
+<img src="{{ asset('public/images/logo-kemendikdasmen.png') }}"
+class="logo-top mx-auto mb-4">
 
-                <!-- Password -->
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <label for="password" class="block text-sm font-semibold text-slate-700">Kata Sandi</label>
-                        @if (Route::has('password.request'))
-                            <a href="{{ route('password.request') }}" class="text-sm font-semibold text-blue-600 hover:text-blue-800 transition-colors">
-                                Lupa sandi?
-                            </a>
-                        @endif
-                    </div>
-                    <div class="relative group">
-                        <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none input-icon-wrapper">
-                            <i class="fa-solid fa-lock text-slate-400 group-focus-within:text-blue-600 transition-colors"></i>
-                        </div>
-                        <input id="password" type="password" name="password" required autocomplete="current-password"
-                            class="block w-full pl-11 pr-4 py-3 border border-slate-300 rounded-xl text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors bg-white shadow-sm hover:border-slate-400" placeholder="••••••••">
-                    </div>
-                </div>
-
-                <!-- Remember Me -->
-                <div class="flex items-center">
-                    <input id="remember_me" type="checkbox" name="remember" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-slate-300 rounded cursor-pointer transition-colors">
-                    <label for="remember_me" class="ml-2 block text-sm font-medium text-slate-700 cursor-pointer select-none">
-                        Ingat Saya
-                    </label>
-                </div>
-
-                <div class="pt-2">
-                    <button type="submit" class="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white transition-all hover:-translate-y-1 hover:shadow-lg" style="background: linear-gradient(135deg, #0d6efd 0%, #00b4db 100%);">
-                        Masuk Dasbor <i class="fa-solid fa-arrow-right ml-2 mt-0.5"></i>
-                    </button>
-                </div>
-            </form>
-            
-            <div class="mt-10 text-center text-sm text-slate-500 font-medium">
-                <p>Butuh bantuan? Silakan hubungi <a href="#" class="font-bold text-blue-600 hover:underline">Tim IT BPMP Prov. Kaltim</a></p>
-            </div>
-        </div>
-    </div>
+<div class="title-login">
+Selamat Datang
 </div>
+
+<div class="subtitle-login">
+Silakan login menggunakan email dan kata sandi Anda untuk mengakses dashboard manajemen.
+</div>
+
+</div>
+
+@if($errors->any())
+<div class="mb-4 text-red-600 text-sm">
+<ul>
+@foreach ($errors->all() as $error)
+<li>{{ $error }}</li>
+@endforeach
+</ul>
+</div>
+@endif
+
+<form method="POST" action="{{ route('login') }}">
+@csrf
+
+<div class="mb-4">
+<label class="label-login">Email Anda</label>
+
+<div class="input-box">
+<i class="fa-solid fa-envelope"></i>
+
+<input
+type="email"
+name="email"
+value="{{ old('email') }}"
+class="input-field"
+placeholder="contoh@kemdikbud.go.id"
+required
+>
+</div>
+</div>
+
+<div class="mb-4">
+
+<div class="flex justify-between items-center mb-1">
+<label class="label-login">Kata Sandi</label>
+
+@if (Route::has('password.request'))
+<a href="{{ route('password.request') }}" class="text-blue-600 text-sm font-semibold">
+Lupa sandi?
+</a>
+@endif
+
+</div>
+
+<div class="input-box">
+<i class="fa-solid fa-lock"></i>
+
+<input
+type="password"
+name="password"
+class="input-field"
+placeholder="••••••••"
+required
+>
+</div>
+
+</div>
+
+<div class="mb-5 flex items-center">
+<input type="checkbox" name="remember" class="mr-2">
+<span class="text-sm text-slate-600">Ingat Saya</span>
+</div>
+
+<button type="submit" class="btn-login">
+Masuk Dasbor →
+</button>
+
+</form>
+
+<div class="footer-login flex flex-col items-center text-center">
+
+<img src="{{ asset('public/images/ramah bermutu.png') }}"
+class="h-14 mb-3 mx-auto">
+
+<div>
+© {{ date('Y') }} Kementerian Pendidikan Dasar dan Menengah<br>
+Balai Penjaminan Mutu Pendidikan Provinsi Kalimantan Timur
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
 </body>
 </html>
