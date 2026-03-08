@@ -67,6 +67,7 @@ Route::prefix('admin')
         // participants
         Route::prefix('participants')->name('participants.')->group(function () {
             Route::get('/', [ParticipantController::class , 'index'])->name('index');
+            Route::get('/duplicates', [ParticipantController::class , 'duplicates'])->name('duplicates');
             Route::get('/template.xls', [ParticipantController::class , 'templateExcel'])->name('template');
             Route::get('/import', [ParticipantController::class , 'importForm'])->name('import.form');
             Route::post('/import', [ParticipantController::class , 'importStore'])->name('import.store');

@@ -259,4 +259,31 @@ class ParticipantController extends Controller
     {
         return Excel::download(new ParticipantsTemplateExport, 'template_peserta.xlsx');
     }
+
+    /**
+     * DETEKSI DUPLIKAT DATA
+     */
+    public function duplicates(Request $request)
+    {
+        $type = $request->query('type', 'nik'); // default cek NIK
+        if (!in_array($type, ['nik', 'email', 'name'])) {
+            $type = 'nik';
+        }
+
+        // Cari nilai yang muncul lebih dari 1 kali
+        $duplicateGroups = DB::table('participants')
+            ->select($type, DB::raw('count(*) as total'))
+            ->whereNotNull($type)
+            ->where($type, '!=', '')
+            ->groupBy($type)
+            ->having('total', '>', 1)
+            ->pluck($type);
+
+        $participants = Participant::whereIn($type, $duplicateGroups)
+            ->with(['event:id,name'])
+            ->orderBy($type)
+            ->get();
+
+        return view('participants.duplicates', compact('participants', 'type'));
+    }
 }

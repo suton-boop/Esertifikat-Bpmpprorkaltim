@@ -21,6 +21,11 @@
   <div class="d-flex flex-wrap gap-2">
     {{-- Header Action Button --}}
     <div class="bg-white p-1 rounded-4 shadow-sm border d-flex gap-1">
+        <a href="{{ route('admin.participants.duplicates') }}"
+           class="btn btn-outline-warning rounded-3 btn-sm px-3 py-2">
+          <i class="fa-solid fa-clone me-1 small"></i> Cek Duplikat
+        </a>
+
         <a href="{{ route('admin.participants.import.form', ['event_id' => $eventId]) }}"
            class="btn btn-soft-primary rounded-3 btn-sm px-3 py-2">
           <i class="fa-solid fa-file-import me-1 small"></i> Import Data
