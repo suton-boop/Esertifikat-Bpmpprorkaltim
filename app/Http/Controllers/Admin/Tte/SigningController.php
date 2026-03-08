@@ -131,7 +131,8 @@ class SigningController extends Controller
             return back()->with('error', 'Signer tidak ditemukan / tidak aktif.');
 
         $ids = $validated['certificate_ids'] ?? [];
-        $ids = array_slice(array_values(array_unique(array_map('intval', $ids))), 0, 20);
+        // Batasi maksimal 50 sertifikat per klik untuk menjaga kestabilan API TTE
+        $ids = array_slice(array_values(array_unique(array_map('intval', $ids))), 0, 50);
         if (count($ids) === 0)
             return back()->with('error', 'Pilih minimal 1 sertifikat (checkbox).');
 
@@ -166,7 +167,7 @@ class SigningController extends Controller
 
         if ($count === 0)
             return back()->with('error', 'Semua data terpilih belum punya PDF.');
-        return back()->with('success', "Bulk dispatch sukses: {$count} data (maks 20).");
+        return back()->with('success', "Bulk dispatch sukses: {$count} data (Maksimal 50 per klik demi kestabilan API).");
     }
 
     public function signNow(Request $request, string $id)

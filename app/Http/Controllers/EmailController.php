@@ -40,15 +40,19 @@ class EmailController extends Controller
 
         $ids = $request->certificate_ids;
 
-        // Disini seharusnya dispatch Job spesifik untuk mengirim email
-        // Mail::to(...)->queue(new CertificateMail($cert));
-        // Untuk saat ini kita ubah statusnya saja
+        // Batasi maksimal 200 email per klik
+        $toProcess = array_slice($ids, 0, 200);
 
-        Certificate::whereIn('id', $ids)->update([
+        Certificate::whereIn('id', $toProcess)->update([
             'status' => Certificate::STATUS_SENT,
             'sent_at' => now(),
         ]);
 
-        return back()->with('success', count($ids) . ' Sertifikat berhasil masuk antrean pengiriman email.');
+        $msg = count($toProcess) . ' Sertifikat masuk antrean pengiriman.';
+        if (count($ids) > 200) {
+            $msg .= ' (Sisa ' . (count($ids) - 200) . ' data diproses pada batch berikutnya).';
+        }
+
+        return back()->with('success', $msg);
     }
 }

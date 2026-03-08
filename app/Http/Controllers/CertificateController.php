@@ -321,13 +321,19 @@ class CertificateController extends Controller
 
         $eventId = (int)$data['event_id'];
 
-        $certs = Certificate::where('event_id', $eventId)
-            ->where('status', Certificate::STATUS_APPROVED)
-            ->get();
+        // Ambil sertifikat yang APPROVED saja
+        $query = Certificate::where('event_id', $eventId)
+            ->where('status', Certificate::STATUS_APPROVED);
 
-        if ($certs->isEmpty()) {
+        $total = $query->count();
+
+        if ($total === 0) {
             return back()->with('error', 'Tidak ada sertifikat APPROVED untuk dibuatkan PDF.');
         }
+
+        // Batasi maksimal 200 data per klik untuk kestabilan server & database request
+        $limit = 200;
+        $certs = $query->limit($limit)->get();
 
         $dispatched = 0;
         foreach ($certs as $c) {
@@ -339,7 +345,12 @@ class CertificateController extends Controller
             $dispatched++;
         }
 
-        return back()->with('success', "{$dispatched} Sertifikat telah dimasukkan ke dalam antrean (Background Job). Proses sedang berjalan di balik layar.");
+        $message = "{$dispatched} Sertifikat telah dimasukkan ke dalam antrean PDF.";
+        if ($total > $limit) {
+            $message .= " (Sisa " . ($total - $limit) . " data lainnya perlu diproses pada batch berikutnya demi keamanan server).";
+        }
+
+        return back()->with('success', $message);
     }
 
     public function preview(Certificate $certificate)
