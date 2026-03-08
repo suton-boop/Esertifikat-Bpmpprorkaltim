@@ -156,8 +156,8 @@
     'desc'        => ['x'=>120,'y'=>450, 'w'=>880,  'font'=>16, 'color'=>'#111111', 'align'=>'justify','weight'=>'400'],
     'date'        => ['x'=>0, 'y'=>567, 'w'=>1123, 'font'=>16, 'color'=>'#111111', 'align'=>'center', 'weight'=>'500'],
     'nik'         => ['x'=>0, 'y'=>345, 'w'=>1123, 'font'=>20, 'color'=>'#0b5fa8', 'align'=>'center', 'weight'=>'600'],
-    'peran'       => ['x'=>0, 'y'=>410, 'w'=>1123, 'font'=>20, 'color'=>'#0b5fa8', 'align'=>'center', 'weight'=>'400'],
-    'institution' => ['x'=>0, 'y'=>440, 'w'=>1123, 'font'=>20, 'color'=>'#0b5fa8', 'align'=>'center', 'weight'=>'400'],
+    'peran'       => ['x'=>0, 'y'=>425, 'w'=>1123, 'font'=>20, 'color'=>'#0b5fa8', 'align'=>'center', 'weight'=>'400'],
+    'institution' => ['x'=>0, 'y'=>450, 'w'=>1123, 'font'=>20, 'color'=>'#0b5fa8', 'align'=>'center', 'weight'=>'400'],
   ];
 
   // ambil config per field (boleh kosong)
@@ -211,6 +211,7 @@
   @endif
 
   {{-- 1) NOMOR SERTIFIKAT --}}
+  @if(isset($fields['number']))
   <div class="field"
        style="
          left: {{ (int)$get($fNumber,'x') }}px;
@@ -223,8 +224,10 @@
        ">
     {{ $numberText }}
   </div>
+  @endif
 
   {{-- 2) NAMA --}}
+  @if(isset($fields['name']))
   <div class="field"
        style="
          left: {{ (int)$get($fName,'x') }}px;
@@ -238,9 +241,10 @@
        ">
     {{ $nameText }}
   </div>
+  @endif
 
   {{-- 2.1) NIK --}}
-  @if($nikText !== '')
+  @if(isset($fields['nik']) && $nikText !== '')
     <div class="field"
          style="
            left: {{ (int)$get($fNik,'x') }}px;
@@ -256,6 +260,7 @@
   @endif
 
   {{-- 3) NAMA KEGIATAN --}}
+  @if(isset($fields['event']))
   <div class="field"
        style="
          left: {{ (int)$get($fEvent,'x') }}px;
@@ -269,9 +274,10 @@
        ">
     {{ $eventText }}
   </div>
+  @endif
 
   {{-- 3.1) PERAN --}}
-  @if($peranText !== '')
+  @if(isset($fields['peran']) && $peranText !== '')
     <div class="field"
          style="
            left: {{ (int)$get($fPeran,'x') }}px;
@@ -287,7 +293,7 @@
   @endif
 
   {{-- 3.2) INSTITUTION --}}
-  @if($institutionText !== '')
+  @if(isset($fields['institution']) && $institutionText !== '')
     <div class="field"
          style="
            left: {{ (int)$get($fInstitution,'x') }}px;
@@ -303,7 +309,7 @@
   @endif
 
   {{-- 4) DESKRIPSI (opsional) --}}
-  @if($descText !== '')
+  @if(isset($fields['desc']) && $descText !== '')
     <div class="field"
          style="
            left: {{ (int)$get($fDesc,'x') }}px;
@@ -319,7 +325,7 @@
   @endif
 
   {{-- 5) TANGGAL --}}
-  @if($dateText !== '')
+  @if(isset($fields['date']) && $dateText !== '')
     <div class="field"
          style="
            left: {{ (int)$get($fDate,'x') }}px;
