@@ -23,6 +23,90 @@
       word-wrap: break-word;
       line-height: 1.1; /* Mengurangi ruang kosong atas bawah teks agar tak saling tabrak */
     }
+
+    /* CSS Khusus Halaman 2 (Nilai/Transkrip) */
+    .page-2-content {
+      font-family: 'Helvetica', 'Arial', sans-serif;
+      font-size: 13px;
+      line-height: 1.25;
+      color: #333;
+    }
+    .page-2-content .transcript-header {
+      width: 100%;
+      margin-bottom: 20px;
+      border-collapse: collapse;
+    }
+    .page-2-content .transcript-header td {
+      padding: 3px 0;
+      vertical-align: top;
+      border: none !important;
+    }
+    .page-2-content table.main-table {
+      width: 950px !important; /* Paksa lebar total agar tidak meluber dari A4 Landscape */
+      margin-left: auto;
+      margin-right: auto;
+      border-collapse: collapse;
+      table-layout: fixed !important; 
+      border: 1px solid #000 !important;
+    }
+    .page-2-content table.main-table th {
+      background-color: #996515 !important; /* Warna Emas/Coklat Premium */
+      color: #ffffff !important;
+      font-weight: bold !important;
+      text-align: center !important;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 10px 5px !important; /* Padding lebih tebal agar cantik */
+      border: 1px solid #7d5311 !important; /* Border warna senada */
+      font-size: 11px !important;
+    }
+    .page-2-content table.main-table th, 
+    .page-2-content table.main-table td {
+      border: 1px solid #000 !important;
+      padding: 6px 5px !important;
+      vertical-align: middle;
+      font-size: 11px !important;
+      line-height: 1.2;
+      word-wrap: break-word;
+    }
+    /* Kunci Lebar Kolom secara Absolut */
+    .page-2-content table.main-table th.col-no,
+    .page-2-content table.main-table td.col-no {
+      width: 30px !important; 
+      text-align: center;
+    }
+    .page-2-content table.main-table th.col-nilai,
+    .page-2-content table.main-table td.col-nilai {
+      width: 70px !important;
+      text-align: center;
+    }
+    .page-2-content table.main-table th.col-predikat,
+    .page-2-content table.main-table td.col-predikat {
+      width: 80px !important;
+      text-align: center;
+    }
+    /* Kolom Komponen mengambil sisanya secara otomatis */
+    .page-2-content table.main-table .col-komponen {
+      width: auto !important;
+    }
+
+    .page-2-content .text-center { text-align: center !important; }
+    .page-2-content .fw-bold { font-weight: bold !important; }
+    
+    .page-2-title {
+      text-align: center;
+      font-size: 21px;
+      font-weight: 800;
+      margin-bottom: 25px;
+      color: #000;
+      letter-spacing: 1px;
+    }
+
+    .transcript-footer {
+      margin-top: 10px;
+      font-size: 11px;
+      line-height: 1.4;
+    }
   </style>
 </head>
 <body>
@@ -222,8 +306,10 @@
       <img src="{{ $bgDataUri2 }}" style="position:absolute; left:0; top:0; width:1122px; height:793px; z-index:-1;">
     @endif
     
-    <div style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; padding: 50px; box-sizing: border-box; z-index: 10;">
-        {!! $page2Content !!}
+    <div class="page-2-content" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; padding: 40px 60px; box-sizing: border-box; z-index: 10;">
+        <div class="transcript-wrapper">
+            {!! $page2Content !!}
+        </div>
     </div>
   </div>
 @endif

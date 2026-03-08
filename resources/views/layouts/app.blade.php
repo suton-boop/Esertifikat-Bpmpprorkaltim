@@ -32,6 +32,45 @@
     .btn { border-radius: 12px; }
     .btn-icon { display:inline-flex; align-items:center; gap:.5rem; }
     .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
+
+    /* ✅ Global Table Beautification */
+    .table {
+      border-collapse: separate;
+      border-spacing: 0;
+      width: 100%;
+      margin-bottom: 0;
+    }
+    .table thead th {
+      background-color: #f8fafc;
+      border-top: 1px solid #e2e8f0;
+      border-bottom: 2px solid #e2e8f0 !important;
+      color: #475569;
+      font-weight: 700;
+      text-transform: uppercase;
+      font-size: 0.72rem;
+      letter-spacing: 0.06em;
+      padding: 1.1rem 1rem;
+      vertical-align: middle;
+    }
+    .table tbody td {
+      padding: 1.1rem 1rem;
+      vertical-align: middle;
+      color: #334155;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 0.9rem;
+    }
+    .table tr:last-child td {
+      border-bottom: 0;
+    }
+    /* Hover effect for rows */
+    .table tbody tr:hover {
+      background-color: #f8fafc;
+      transition: background-color 0.2s ease;
+    }
+    /* Table inside card polish */
+    .card .table-responsive {
+      border-radius: 0 0 var(--card-radius) var(--card-radius);
+    }
   </style>
 </head>
 <body>
