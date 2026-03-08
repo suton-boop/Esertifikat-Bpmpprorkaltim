@@ -148,33 +148,39 @@
       return $baseSize;
   };
 
-  // ambil config per field (boleh kosong)
-  $fNumber = $fields['number'] ?? [];
-  $fName   = $fields['name']   ?? [];
-  $fEvent  = $fields['event']  ?? [];
-  $fDesc   = $fields['desc']   ?? [];
-  $fDate   = $fields['date']   ?? [];
-
-  // default posisi (kalau settings belum lengkap tetap tampil)
-  $defaults = [
-    'number' => ['x'=>0, 'y'=>210, 'w'=>1123, 'font'=>16, 'color'=>'#111111', 'align'=>'center', 'weight'=>'600'],
-    'name'   => ['x'=>0, 'y'=>315, 'w'=>1123, 'font'=>48, 'color'=>'#0b5fa8', 'align'=>'center', 'weight'=>'700'],
-    'event'  => ['x'=>0, 'y'=>410, 'w'=>1123, 'font'=>20, 'color'=>'#0b5fa8', 'align'=>'center', 'weight'=>'400'],
-    'desc'   => ['x'=>120,'y'=>450, 'w'=>880,  'font'=>16, 'color'=>'#111111', 'align'=>'justify','weight'=>'400'],
-    'date'   => ['x'=>0, 'y'=>567, 'w'=>1123, 'font'=>16, 'color'=>'#111111', 'align'=>'center', 'weight'=>'500'],
+    'date'        => ['x'=>0, 'y'=>567, 'w'=>1123, 'font'=>16, 'color'=>'#111111', 'align'=>'center', 'weight'=>'500'],
+    'nik'         => ['x'=>0, 'y'=>345, 'w'=>1123, 'font'=>20, 'color'=>'#0b5fa8', 'align'=>'center', 'weight'=>'600'],
+    'peran'       => ['x'=>0, 'y'=>410, 'w'=>1123, 'font'=>20, 'color'=>'#0b5fa8', 'align'=>'center', 'weight'=>'400'],
+    'institution' => ['x'=>0, 'y'=>440, 'w'=>1123, 'font'=>20, 'color'=>'#0b5fa8', 'align'=>'center', 'weight'=>'400'],
   ];
 
+  // ambil config per field (boleh kosong)
+  $fNumber      = $fields['number']      ?? [];
+  $fName        = $fields['name']        ?? [];
+  $fEvent       = $fields['event']       ?? [];
+  $fDesc        = $fields['desc']        ?? [];
+  $fDate        = $fields['date']        ?? [];
+  $fNik         = $fields['nik']         ?? [];
+  $fPeran       = $fields['peran']       ?? [];
+  $fInstitution = $fields['institution'] ?? [];
+
   // merge: settings menimpa defaults
-  $fNumber = array_merge($defaults['number'], is_array($fNumber)?$fNumber:[]);
-  $fName   = array_merge($defaults['name'],   is_array($fName)?$fName:[]);
-  $fEvent  = array_merge($defaults['event'],  is_array($fEvent)?$fEvent:[]);
-  $fDesc   = array_merge($defaults['desc'],   is_array($fDesc)?$fDesc:[]);
-  $fDate   = array_merge($defaults['date'],   is_array($fDate)?$fDate:[]);
+  $fNumber      = array_merge($defaults['number'],      is_array($fNumber)?$fNumber:[]);
+  $fName        = array_merge($defaults['name'],        is_array($fName)?$fName:[]);
+  $fEvent       = array_merge($defaults['event'],       is_array($fEvent)?$fEvent:[]);
+  $fDesc        = array_merge($defaults['desc'],        is_array($fDesc)?$fDesc:[]);
+  $fDate        = array_merge($defaults['date'],        is_array($fDate)?$fDate:[]);
+  $fNik         = array_merge($defaults['nik'],         is_array($fNik)?$fNik:[]);
+  $fPeran       = array_merge($defaults['peran'],       is_array($fPeran)?$fPeran:[]);
+  $fInstitution = array_merge($defaults['institution'], is_array($fInstitution)?$fInstitution:[]);
 
   // teks
-  $numberText = $certificate->certificate_number ? "Nomor: {$certificate->certificate_number}" : "Nomor: -";
-  $nameText   = $participant?->name ?? '-';
-  $eventText  = $event?->name ?? '-';
+  $numberText      = $certificate->certificate_number ? "Nomor: {$certificate->certificate_number}" : "Nomor: -";
+  $nameText        = $participant?->name ?? '-';
+  $eventText       = $event?->name ?? '-';
+  $nikText         = $participant?->nik ? "NISN: {$participant->nik}" : "";
+  $peranText       = $participant?->peran ?? "";
+  $institutionText = $participant?->institution ?? "";
 
   // format Indonesia (Februari, dll)
   // PRIORITAS: 
@@ -227,6 +233,22 @@
     {{ $nameText }}
   </div>
 
+  {{-- 2.1) NIK --}}
+  @if($nikText !== '')
+    <div class="field"
+         style="
+           left: {{ (int)$get($fNik,'x') }}px;
+           top: {{ (int)$get($fNik,'y') }}px;
+           width: {{ (int)$get($fNik,'w') }}px;
+           font-size: {{ $getFontSize($nikText, $fNik, 20) }}px;
+           color: {{ $get($fNik,'color') }};
+           text-align: {{ $get($fNik,'align') }};
+           font-weight: {{ $get($fNik,'weight') }};
+         ">
+      {{ $nikText }}
+    </div>
+  @endif
+
   {{-- 3) NAMA KEGIATAN --}}
   <div class="field"
        style="
@@ -241,6 +263,38 @@
        ">
     {{ $eventText }}
   </div>
+
+  {{-- 3.1) PERAN --}}
+  @if($peranText !== '')
+    <div class="field"
+         style="
+           left: {{ (int)$get($fPeran,'x') }}px;
+           top: {{ (int)$get($fPeran,'y') }}px;
+           width: {{ (int)$get($fPeran,'w') }}px;
+           font-size: {{ $getFontSize($peranText, $fPeran, 20) }}px;
+           color: {{ $get($fPeran,'color') }};
+           text-align: {{ $get($fPeran,'align') }};
+           font-weight: {{ $get($fPeran,'weight') }};
+         ">
+      {{ $peranText }}
+    </div>
+  @endif
+
+  {{-- 3.2) INSTITUTION --}}
+  @if($institutionText !== '')
+    <div class="field"
+         style="
+           left: {{ (int)$get($fInstitution,'x') }}px;
+           top: {{ (int)$get($fInstitution,'y') }}px;
+           width: {{ (int)$get($fInstitution,'w') }}px;
+           font-size: {{ $getFontSize($institutionText, $fInstitution, 20) }}px;
+           color: {{ $get($fInstitution,'color') }};
+           text-align: {{ $get($fInstitution,'align') }};
+           font-weight: {{ $get($fInstitution,'weight') }};
+         ">
+      {{ $institutionText }}
+    </div>
+  @endif
 
   {{-- 4) DESKRIPSI (opsional) --}}
   @if($descText !== '')
