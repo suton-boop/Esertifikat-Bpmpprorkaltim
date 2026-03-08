@@ -63,12 +63,29 @@ margin-bottom:8px;
 position:relative;
 }
 
-.input-box i{
+.input-box i.left-icon{
 position:absolute;
 left:16px;
 top:50%;
 transform:translateY(-50%);
 color:#94a3b8;
+}
+
+.input-box .password-toggle{
+position:absolute;
+right:16px;
+top:50%;
+transform:translateY(-50%);
+color:#94a3b8;
+cursor:pointer;
+border:none;
+background:none;
+padding:0;
+transition:0.2s;
+}
+
+.input-box .password-toggle:hover{
+color:#3b82f6;
 }
 
 .input-field{
@@ -158,7 +175,7 @@ Silakan login menggunakan email dan kata sandi Anda untuk mengakses dashboard ma
 <label class="label-login">Email Anda</label>
 
 <div class="input-box">
-<i class="fa-solid fa-envelope"></i>
+<i class="fa-solid fa-envelope left-icon"></i>
 
 <input
 type="email"
@@ -185,15 +202,20 @@ Lupa sandi?
 </div>
 
 <div class="input-box">
-<i class="fa-solid fa-lock"></i>
+<i class="fa-solid fa-lock left-icon"></i>
 
 <input
 type="password"
 name="password"
+id="password"
 class="input-field"
 placeholder="••••••••"
 required
 >
+
+<button type="button" class="password-toggle" id="togglePassword">
+<i class="fa-solid fa-eye" id="eyeIcon"></i>
+</button>
 </div>
 
 </div>
@@ -227,5 +249,19 @@ Balai Penjaminan Mutu Pendidikan Provinsi Kalimantan Timur
 
 </div>
 
+<script>
+const togglePassword = document.querySelector('#togglePassword');
+const password = document.querySelector('#password');
+const eyeIcon = document.querySelector('#eyeIcon');
+
+if (togglePassword && password && eyeIcon) {
+    togglePassword.addEventListener('click', function (e) {
+        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+        password.setAttribute('type', type);
+        eyeIcon.classList.toggle('fa-eye');
+        eyeIcon.classList.toggle('fa-eye-slash');
+    });
+}
+</script>
 </body>
 </html>
