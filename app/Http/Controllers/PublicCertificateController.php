@@ -73,7 +73,7 @@ class PublicCertificateController extends Controller
 
     public function verifyByToken($code)
     {
-        $cert = \App\Models\Certificate::with(['participant', 'event'])
+        $cert = \App\Models\Certificate::with(['participant', 'event', 'digitalSignature.signerCertificate'])
             ->where('verify_token', $code)
             ->whereIn('status', [\App\Models\Certificate::STATUS_SIGNED, 'terbit', \App\Models\Certificate::STATUS_FINAL_GENERATED])
             ->first();

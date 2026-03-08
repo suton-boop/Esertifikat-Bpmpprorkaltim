@@ -135,6 +135,8 @@ Route::prefix('admin')
 
                 Route::prefix('users')->name('users.')->group(function () {
                     Route::get('/', [AdminUserController::class , 'index'])->name('index');
+                    Route::get('/import', [AdminUserController::class , 'importForm'])->name('import.form');
+                    Route::post('/import', [AdminUserController::class , 'importStore'])->name('import.store');
                     Route::get('/create', [AdminUserController::class , 'create'])->name('create');
                     Route::post('/', [AdminUserController::class , 'store'])->name('store');
                     Route::get('/{user}/edit', [AdminUserController::class , 'edit'])->whereNumber('user')->name('edit');

@@ -75,11 +75,16 @@
                                     </div>
                                     <div>
                                         <div class="fw-bold text-dark small">TTE Valid & Terverifikasi</div>
-                                        <div class="text-muted" style="font-size: 0.75rem;">Sesuai dengan regulasi TTE di lingkungan Kemendikbudristek</div>
+                                        <div class="text-muted mb-1" style="font-size: 0.75rem;">Sesuai dengan regulasi TTE di lingkungan Kemendikbudristek</div>
+                                        @if($cert->digitalSignature && $cert->digitalSignature->signerCertificate)
+                                            <div class="badge bg-primary text-wrap text-start mt-1" style="font-size: 0.7rem; font-weight: 500;">
+                                                <i class="fa-solid fa-user-pen me-1"></i> Penanda Tangan: {{ $cert->digitalSignature->signerCertificate->name }}
+                                            </div>
+                                        @endif
                                     </div>
                                 </div>
-                                <p class="small text-muted mb-4">
-                                    Dokumen ini telah ditandatangani secara elektronik menggunakan sertifikat elektronik yang diterbitkan oleh Balai Sertifikasi Elektronik (BSrE), BSSN.
+                                <p class="small text-muted mb-4" style="text-align: justify;">
+                                    Dokumen ini telah ditandatangani secara elektronik menggunakan sertifikat elektronik yang valid dan dapat diverifikasi keasliannya sesuai dengan ketentuan peraturan perundang-undangan tentang informasi dan transaksi elektronik.
                                 </p>
                             </div>
                             

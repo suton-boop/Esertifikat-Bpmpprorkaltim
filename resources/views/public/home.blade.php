@@ -82,7 +82,7 @@
                 <i class="fa-solid fa-shield-halved"></i>
             </div>
             <h5 class="fw-bold text-dark mb-3">Legal & Aman</h5>
-            <p class="text-muted small mb-0 px-2">Keaslian dokumen terjamin dengan TTE (Tanda Tangan Elektronik) resmi sesuai standar BSrE.</p>
+            <p class="text-muted small mb-0 px-2">Keaslian dokumen terjamin dengan TTE (Tanda Tangan Elektronik) resmi sesuai standar.</p>
         </div>
     </div>
     

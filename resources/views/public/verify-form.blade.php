@@ -21,7 +21,7 @@
                     <div class="d-flex align-items-center gap-3 text-start">
                         <i class="fa-solid fa-circle-info fs-4"></i>
                         <div class="small">
-                            <strong>Tips:</strong> Nomor sertifikat biasanya tertera di bagian bawah atau di bawah Judul Sertifikat (Contoh: 1234/CERT/BPMP/2024).
+                            <strong>Tips:</strong> Nomor sertifikat tertera di bagian atas atau di bawah Judul Sertifikat (Contoh: 1234/Sertifikat/BPMPKALTIM/2026).
                         </div>
                     </div>
                 </div>

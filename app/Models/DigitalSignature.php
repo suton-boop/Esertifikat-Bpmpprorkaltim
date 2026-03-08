@@ -52,4 +52,9 @@ class DigitalSignature extends Model
         'width' => 'integer',
         'height' => 'integer',
     ];
+
+    public function signerCertificate()
+    {
+        return $this->belongsTo(SignerCertificate::class);
+    }
 }

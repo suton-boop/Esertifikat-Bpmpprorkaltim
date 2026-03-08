@@ -8,19 +8,20 @@ use App\Models\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rule;
+use Maatwebsite\Excel\Facades\Excel;
 
 class UserController extends Controller
 {
     public function index()
     {
         $users = User::with('role')->latest()->get();
-        return view('admin.users.index', compact('users'));
+        return view('admin.system.users.index', compact('users'));
     }
 
     public function create()
     {
         $roles = Role::orderBy('name')->get();
-        return view('admin.users.create', compact('roles'));
+        return view('admin.system.users.create', compact('roles'));
     }
 
     public function store(Request $request)
@@ -51,8 +52,7 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         if ($user->role?->name === 'superadmin') {
-        // kunci role_id agar tidak berubah
-        $data['role_id'] = $user->role_id;
+            $data['role_id'] = $user->role_id;
         }
 
         $data = $request->validate([
@@ -77,23 +77,87 @@ class UserController extends Controller
 
         return redirect()->route('admin.system.users.index')->with('success', 'User berhasil diperbarui.');
     }
-    //delet
+
     public function destroy(User $user)
     {
-    // 1) jangan bisa hapus diri sendiri
-    if (auth()->id() === $user->id) {
-        return back()->with('error', 'Tidak bisa menghapus akun sendiri.');
+        if (auth()->id() === $user->id) {
+            return back()->with('error', 'Tidak bisa menghapus akun sendiri.');
+        }
+
+        $user->delete();
+        return redirect()->route('admin.system.users.index')->with('success', 'User berhasil dihapus.');
     }
 
-    // 2) OPTIONAL: blok hapus role superadmin
-    // kalau kamu mau superadmin tidak bisa dihapus, aktifkan:
-    // if ($user->role?->name === 'superadmin') {
-    //     return back()->with('error', 'User superadmin tidak boleh dihapus.');
-    // }
-
-    $user->delete();
-
-    return redirect()->route('admin.system.users.index')->with('success', 'User berhasil dihapus.');
+    public function importForm()
+    {
+        if (!auth()->user()->hasRole('superadmin')) {
+            abort(403);
+        }
+        return view('admin.system.users.import');
     }
 
+    public function importStore(Request $request)
+    {
+        if (!auth()->user()->hasRole('superadmin')) {
+            abort(403);
+        }
+
+        $request->validate([
+            'file' => 'required|file|mimes:xls,xlsx,csv,txt|max:4096'
+        ]);
+
+        $rows = Excel::toArray(new \stdClass, $request->file('file'));
+
+        if (empty($rows) || empty($rows[0])) {
+            return back()->with('error', 'File Excel/CSV kosong atau tidak bisa dibaca.');
+        }
+
+        $data = $rows[0];
+        $header = array_shift($data);
+
+        if (!$header || count($header) < 4) {
+            return back()->with('error', 'Format Excel tidak valid. Minimal 4 kolom: Nama, Email, Password, Role.');
+        }
+
+        $roles = Role::all()->pluck('id', 'name')->toArray();
+        $inserted = 0;
+        $errors = [];
+
+        foreach ($data as $index => $row) {
+            $name = trim($row[0] ?? '');
+            $email = trim($row[1] ?? '');
+            $password = trim($row[2] ?? '');
+            $roleName = strtolower(trim($row[3] ?? ''));
+
+            if (!$name || !$email || !$password) continue;
+
+            if (User::where('email', $email)->exists()) {
+                $errors[] = "Baris " . ($index + 2) . ": Email $email sudah digunakan.";
+                continue;
+            }
+
+            $roleId = $roles[$roleName] ?? null;
+            if (!$roleId) {
+                $errors[] = "Baris " . ($index + 2) . ": Role '$roleName' tidak ditemukan.";
+                continue;
+            }
+
+            User::create([
+                'name' => $name,
+                'email' => $email,
+                'password' => Hash::make($password),
+                'role_id' => $roleId,
+            ]);
+
+            $inserted++;
+        }
+
+        $msg = "Import berhasil: $inserted user ditambahkan.";
+        if (!empty($errors)) {
+            $msg .= " Namun ada beberapa error: " . implode(', ', $errors);
+            return redirect()->route('admin.system.users.index')->with('warning', $msg);
+        }
+
+        return redirect()->route('admin.system.users.index')->with('success', $msg);
+    }
 }

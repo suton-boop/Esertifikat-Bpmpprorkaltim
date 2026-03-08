@@ -8,28 +8,23 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class Certificate extends Model
 {
     // Status workflow
-    public const STATUS_DRAFT          = 'draft';
-    public const STATUS_SUBMITTED      = 'submitted';
-    public const STATUS_APPROVED       = 'approved';
-    public const STATUS_REJECTED       = 'rejected';
-    public const STATUS_FINAL_GENERATED= 'final_generated';
-    public const STATUS_SIGNED         = 'signed';
-    public const STATUS_SENT           = 'sent';
+    public const STATUS_DRAFT = 'draft';
+    public const STATUS_SUBMITTED = 'submitted';
+    public const STATUS_APPROVED = 'approved';
+    public const STATUS_REJECTED = 'rejected';
+    public const STATUS_FINAL_GENERATED = 'final_generated';
+    public const STATUS_SIGNED = 'signed';
+    public const STATUS_SENT = 'sent';
 
     protected $table = 'certificates';
 
-    /**
-     * Pastikan hanya ADA SATU $fillable (ini).
-     * Sesuaikan dengan kolom yang BENAR di tabelmu.
-     */
-    
     protected $fillable = [
         'pdf_path',
         'signed_pdf_path',
         'signed_at',
         'verify_token',
         'status',
-      
+
         'event_id',
         'participant_id',
 
@@ -39,8 +34,8 @@ class Certificate extends Model
         'sequence',
 
         // file path
-        'pdf_path',          // final pdf path (atau path final)
-        'signed_pdf_path',   // jika kamu tambah kolom ini (nullable)
+        'pdf_path', // final pdf path (atau path final)
+        'signed_pdf_path', // jika kamu tambah kolom ini (nullable)
 
         // security
         'verify_token',
@@ -61,20 +56,32 @@ class Certificate extends Model
 
     protected $casts = [
         'submitted_at' => 'datetime',
-        'approved_at'  => 'datetime',
-        'rejected_at'  => 'datetime',
+        'approved_at' => 'datetime',
+        'rejected_at' => 'datetime',
         'generated_at' => 'datetime',
-        'signed_at'    => 'datetime',
-        'sent_at'      => 'datetime',
+        'signed_at' => 'datetime',
+        'sent_at' => 'datetime',
     ];
 
-    // Relations (opsional, tapi enak)
-     public function participant() {
-    return $this->belongsTo(\App\Models\Participant::class);
+    // Relations
+    public function participant()
+    {
+        return $this->belongsTo(Participant::class);
     }
 
-    public function event() {
-    return $this->belongsTo(\App\Models\Event::class);
+    public function event()
+    {
+        return $this->belongsTo(Event::class);
+    }
+
+    public function submittedBy()
+    {
+        return $this->belongsTo(User::class , 'submitted_by');
+    }
+
+    public function digitalSignature()
+    {
+        return $this->hasOne(DigitalSignature::class);
     }
 
     // Helper
@@ -82,10 +89,4 @@ class Certificate extends Model
     {
         return $this->status === $status;
     }
-    public function submittedBy()
-    {
-    return $this->belongsTo(\App\Models\User::class, 'submitted_by');
-    }
-
-
 }
