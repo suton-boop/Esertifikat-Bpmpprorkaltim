@@ -70,6 +70,14 @@ return [
     ],
 
     [
+        'title' => 'Statistik Pengunjung',
+        'icon' => 'fa-solid fa-users-viewfinder',
+        'route' => 'admin.visitors.index',
+        'active' => 'admin.visitors.index',
+        'permission' => 'report-read',
+    ],
+
+    [
         'title' => 'Profil Pengguna',
         'icon' => 'fa-solid fa-user-pen',
         'route' => 'admin.profile.edit',

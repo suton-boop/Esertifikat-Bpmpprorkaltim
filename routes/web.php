@@ -23,6 +23,7 @@ use App\Http\Controllers\Admin\AuditController;
 use App\Http\Controllers\Admin\Tte\TteDashboardController;
 use App\Http\Controllers\Admin\Tte\SignerCertificateController;
 use App\Http\Controllers\Admin\Tte\SigningController;
+use App\Http\Controllers\Admin\VisitorController;
 
 use App\Models\Certificate;
 
@@ -35,6 +36,7 @@ Route::get('/', function () {
             \App\Models\Certificate::STATUS_FINAL_GENERATED
         ])->count(),
         'total_participants' => \App\Models\Participant::count(),
+        'total_visitors' => \App\Models\Visitor::count(),
     ];
     return view('public.home', compact('stats'));
 })->name('public.home');
@@ -199,6 +201,7 @@ Route::prefix('admin')
         Route::post('/monitoring/retry-failed', [MonitoringController::class , 'retryAllFailed'])->name('monitoring.retryFailed');
         Route::post('/monitoring/clear-failed', [MonitoringController::class , 'clearAllFailed'])->name('monitoring.clearFailed');
         Route::get('/audit', [AuditController::class , 'index'])->name('audit.index');
+        Route::get('/visitors', [VisitorController::class , 'index'])->name('visitors.index');
     });
 
 require __DIR__ . '/auth.php';

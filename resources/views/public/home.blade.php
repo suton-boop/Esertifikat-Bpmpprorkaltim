@@ -36,29 +36,37 @@
     </div>
 </div>
 
-<!-- Statistics Section -->
-<div class="row g-4 mb-5 pb-5 mt-2">
-    <div class="col-md-6">
-        <div class="card border border-light shadow-sm rounded-4 p-4 text-center overflow-hidden position-relative stat-card bg-white">
+<div class="row g-4 mb-5 pb-5 mt-2 text-center">
+    <div class="col-md-4">
+        <div class="card border border-light shadow-sm rounded-4 p-4 text-center overflow-hidden position-relative stat-card bg-white h-100">
             <div class="position-relative z-1">
                 <div class="display-4 mb-1 fw-bold" style="color: var(--nav-blue);">{{ number_format($stats['total_certificates'], 0, ',', '.') }}</div>
-                <div class="text-dark fw-bold fs-5">Sertifikat Diterbitkan</div>
-                <div class="text-muted small mt-1">Total sertifikat yang telah melewati proses digital</div>
+                <div class="text-dark fw-bold fs-6">Sertifikat Terbit</div>
             </div>
             <div class="stat-icon-bg">
                 <i class="fa-solid fa-certificate"></i>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card border border-light shadow-sm rounded-4 p-4 text-center overflow-hidden position-relative stat-card bg-white">
+    <div class="col-md-4">
+        <div class="card border border-light shadow-sm rounded-4 p-4 text-center overflow-hidden position-relative stat-card bg-white h-100">
             <div class="position-relative z-1">
                 <div class="display-4 mb-1 fw-bold" style="color: var(--nav-blue-2);">{{ number_format($stats['total_participants'], 0, ',', '.') }}</div>
-                <div class="text-dark fw-bold fs-5">Peserta Terdaftar</div>
-                <div class="text-muted small mt-1">Peserta aktif yang terdata dalam sistem</div>
+                <div class="text-dark fw-bold fs-6">Peserta</div>
             </div>
             <div class="stat-icon-bg">
                 <i class="fa-solid fa-users"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border border-light shadow-sm rounded-4 p-4 text-center overflow-hidden position-relative stat-card bg-white h-100">
+            <div class="position-relative z-1">
+                <div class="display-4 mb-1 fw-bold text-success">{{ number_format($stats['total_visitors'] ?? 0, 0, ',', '.') }}</div>
+                <div class="text-dark fw-bold fs-6">Pengunjung</div>
+            </div>
+            <div class="stat-icon-bg">
+                <i class="fa-solid fa-eye"></i>
             </div>
         </div>
     </div>
