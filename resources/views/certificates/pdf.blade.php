@@ -240,7 +240,12 @@
   $dateText = $dateText ? "Samarinda, {$dateText}" : "";
 
   // deskripsi: ambil dari event->description (Opsional A)
-  $descText = trim((string)($event?->description ?? ''));
+  // PRIORITAS (Sama seperti Tanggal): Jika dinamis, ambil dari keterangan peserta (fallback event).
+  $descText = ($event?->is_date_per_participant) 
+             ? ($participant?->keterangan ?: $event?->description) 
+             : $event?->description;
+
+  $descText = trim((string)($descText ?? ''));
 @endphp
 
 <div class="page {{ !empty($template->page_2_html) ? 'page-break' : '' }}">
