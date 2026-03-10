@@ -205,7 +205,7 @@
         <div class="container container-main">
             <nav class="navbar navbar-expand-lg navbar-dark navbar-gov">
                 <a class="brand-logo navbar-brand m-0" href="/">
-                    <img src="{{ asset('images/Asset 2@4x.png') }}" alt="Kemendikdasmen">
+                    <img src="{{ asset('public/images/Asset 2@4x.png') }}" alt="Kemendikdasmen">
                 </a>
 
                  <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
