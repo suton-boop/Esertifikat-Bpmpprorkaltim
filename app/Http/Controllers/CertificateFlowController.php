@@ -24,7 +24,8 @@ class CertificateFlowController extends Controller
         return back()->with('success', 'Berhasil diajukan untuk persetujuan.');
     }
 
-    public function submitAll(Request $request)    {
+    public function submitAll(Request $request)
+    {
         $data = $request->validate([
             'event_id' => ['required', 'integer', 'exists:events,id'],
         ]);
@@ -44,13 +45,14 @@ class CertificateFlowController extends Controller
             return back()->with('error', 'Tidak ada sertifikat DRAFT untuk diajukan pada event ini.');
         }
 
-        return back()->with('success', "Berhasil mengajukan {$affected} draft ke persetujuan.");    }
+        return back()->with('success', "Berhasil mengajukan {$affected} draft ke persetujuan.");
+    }
 
     public function revise(Certificate $certificate)
     {
-        // Izinkan revisi hanya jika sudah ditandatangani atau sudah generate PDF final
-        if (!in_array($certificate->status, [Certificate::STATUS_SIGNED, Certificate::STATUS_FINAL_GENERATED])) {
-            return back()->with('error', 'Hanya sertifikat yang sudah TTE atau PDF Final yang bisa direvisi.');
+        // Izinkan revisi jika sudah TTE, sudah PDF final, atau Gagal TTE
+        if (!in_array(strtolower($certificate->status), [Certificate::STATUS_SIGNED, Certificate::STATUS_FINAL_GENERATED, 'gagal_tte'])) {
+            return back()->with('error', 'Hanya sertifikat yang sudah TTE, PDF Final, atau Gagal TTE yang bisa direvisi.');
         }
 
         // Hapus file fisik jika ada

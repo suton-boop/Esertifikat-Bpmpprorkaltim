@@ -181,13 +181,14 @@
 
             $statusVal = $hasCert ? ($cert->status ?? \App\Models\Certificate::STATUS_DRAFT) : null;
 
-            $badgeClass = match($statusVal) {
+            $badgeClass = match(strtolower((string)$statusVal)) {
               \App\Models\Certificate::STATUS_DRAFT => 'bg-warning text-dark',
               \App\Models\Certificate::STATUS_SUBMITTED => 'bg-info text-dark',
               \App\Models\Certificate::STATUS_APPROVED => 'bg-primary',
               \App\Models\Certificate::STATUS_FINAL_GENERATED => 'bg-success',
               \App\Models\Certificate::STATUS_SIGNED => 'bg-success',
               \App\Models\Certificate::STATUS_REJECTED => 'bg-danger',
+              'gagal_tte' => 'bg-danger',
               default => 'bg-secondary'
             };
           @endphp
@@ -285,8 +286,8 @@
                   </button>
                 @endif
                 
-                {{-- 6) Reset/Revise: hanya saat final_generated atau signed + Cek Role --}}
-                @if($hasCert && in_array($statusVal, [\App\Models\Certificate::STATUS_FINAL_GENERATED, \App\Models\Certificate::STATUS_SIGNED]) && in_array(auth()->user()->role?->name, ['admin', 'superadmin']))
+                {{-- 6) Reset/Revise: hanya saat final_generated, signed, atau gagal_tte + Cek Role --}}
+                @if($hasCert && in_array(strtolower($statusVal), [\App\Models\Certificate::STATUS_FINAL_GENERATED, \App\Models\Certificate::STATUS_SIGNED, 'gagal_tte']) && in_array(auth()->user()->role?->name, ['admin', 'superadmin']))
                   <form method="POST" action="{{ route('admin.certificates.revise', $cert->id) }}" class="d-inline" onsubmit="return confirm('Apakah Anda yakin ingin melakukan revisi? Sertifikat akan di-reset ke status Approved dan file PDF lama akan dihapus. Nomor sertifikat TETAP.')">
                     @csrf
                     <button class="btn btn-danger btn-sm rounded-3" title="Reset / Revisi (Nomor Tetap)">

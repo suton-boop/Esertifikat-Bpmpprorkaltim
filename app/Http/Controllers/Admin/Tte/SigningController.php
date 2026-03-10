@@ -23,7 +23,8 @@ class SigningController extends Controller
         $events = Event::query()->orderByDesc('start_date')->orderByDesc('id')->get(['id', 'name']);
         $signers = SignerCertificate::query()->where('is_active', true)->orderBy('name')->get(['id', 'code', 'name']);
 
-        $query = Certificate::query()->with(['event:id,name', 'participant:id,name'])->whereIn('status', ['approved', 'final_generated']);
+        $query = Certificate::query()->with(['event:id,name', 'participant:id,name'])
+            ->whereIn('status', ['approved', 'final_generated', 'gagal_tte', 'Gagal_tte']);
         if (!empty($eventId) && is_numeric($eventId)) {
             $query->where('event_id', (int)$eventId);
         }
@@ -81,7 +82,7 @@ class SigningController extends Controller
         $cert = Certificate::query()->with(['event', 'participant'])->find((int)$id);
         if (!$cert)
             return back()->with('error', 'Sertifikat tidak ditemukan.');
-        if (!in_array($cert->status, ['approved', 'final_generated'], true))
+        if (!in_array(strtolower($cert->status), ['approved', 'final_generated', 'gagal_tte'], true))
             return back()->with('error', 'Status tidak valid.');
 
         $signer = SignerCertificate::query()->where('id', $validated['signer_certificate_id'])->where('is_active', true)->first();
@@ -142,7 +143,9 @@ class SigningController extends Controller
         if (count($ids) === 0)
             return back()->with('error', 'Pilih minimal 1 sertifikat (checkbox).');
 
-        $certs = Certificate::query()->whereIn('id', $ids)->whereIn('status', ['approved', 'final_generated'])->get(['id', 'pdf_path']);
+        $certs = Certificate::query()->whereIn('id', $ids)
+            ->whereIn('status', ['approved', 'final_generated', 'gagal_tte', 'Gagal_tte'])
+            ->get(['id', 'pdf_path']);
         if ($certs->count() === 0)
             return back()->with('error', 'Tidak ada sertifikat valid untuk dispatch.');
 

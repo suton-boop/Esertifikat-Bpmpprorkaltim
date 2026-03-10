@@ -6,7 +6,7 @@
 <div class="d-flex justify-content-between align-items-center mb-4">
   <div>
     <h4 class="mb-0 fw-bold">Signing Queue</h4>
-    <div class="text-muted">Daftar sertifikat status <b>FINAL_GENERATED</b> yang siap untuk dibubuhi Tanda Tangan Elektronik.</div>
+    <div class="text-muted">Daftar sertifikat status <b>FINAL_GENERATED</b> atau <b>GAGAL_TTE</b> yang siap untuk dibubuhi Tanda Tangan Elektronik.</div>
   </div>
 </div>
 
@@ -165,7 +165,10 @@
               <div class="small text-muted">{{ $c->event?->name ?? '-' }}</div>
             </td>
             <td class="py-3">
-              <span class="badge bg-success bg-opacity-10 text-success border border-success-subtle rounded-pill">
+              @php
+                $isFailed = strtolower($c->status) === 'gagal_tte';
+              @endphp
+              <span class="badge {{ $isFailed ? 'bg-danger' : 'bg-success' }} bg-opacity-10 {{ $isFailed ? 'text-danger' : 'text-success' }} border {{ $isFailed ? 'border-danger' : 'border-success' }}-subtle rounded-pill">
                 {{ strtoupper((string) $c->status) }}
               </span>
             </td>
