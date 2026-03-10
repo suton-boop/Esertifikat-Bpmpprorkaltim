@@ -8,43 +8,43 @@ use Illuminate\Support\Facades\Auth;
 class AuditLogger
 {
     public function log(
-        string \,
-        ?string \ = null,
-        ?string \ = null,
-        array \ = [],
-        ?int \ = null,
-        ?string \ = null,
-        ?string \ = null
+        string $eventType,
+        ?string $subjectId = null,
+        ?string $subjectType = null,
+        array $metadata = [],
+        ?int $actorId = null,
+        ?string $ip = null,
+        ?string $userAgent = null
     ): AuditLog {
-        \ = AuditLog::query()->latest('created_at')->first();
-        \ = \->hash;
+        $prev = AuditLog::query()->latest('created_at')->first();
+        $prevHash = $prev?->hash;
 
-        \ ??= Auth::id();
+        $actorId ??= Auth::id();
 
-        \ = [
-            'event_type' => \,
-            'subject_id' => \,
-            'subject_type' => \,
-            'actor_id' => \,
-            'actor_ip' => \,
-            'actor_user_agent' => \,
-            'metadata' => \,
-            'prev_hash' => \,
+        $payload = [
+            'event_type' => $eventType,
+            'subject_id' => $subjectId,
+            'subject_type' => $subjectType,
+            'actor_id' => $actorId,
+            'actor_ip' => $ip,
+            'actor_user_agent' => $userAgent,
+            'metadata' => $metadata,
+            'prev_hash' => $prevHash,
             'ts' => now()->toISOString(),
         ];
 
-        \ = hash('sha256', json_encode(\, JSON_UNESCAPED_SLASHES));
+        $hash = hash('sha256', json_encode($payload, JSON_UNESCAPED_SLASHES));
 
         return AuditLog::query()->create([
-            'event_type' => \,
-            'subject_id' => \,
-            'subject_type' => \,
-            'actor_id' => \,
-            'actor_ip' => \,
-            'actor_user_agent' => \,
-            'metadata' => \,
-            'prev_hash' => \,
-            'hash' => \,
+            'event_type' => $eventType,
+            'subject_id' => $subjectId,
+            'subject_type' => $subjectType,
+            'actor_id' => $actorId,
+            'actor_ip' => $ip,
+            'actor_user_agent' => $userAgent,
+            'metadata' => $metadata,
+            'prev_hash' => $prevHash,
+            'hash' => $hash,
         ]);
     }
 }

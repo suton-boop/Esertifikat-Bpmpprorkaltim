@@ -61,19 +61,19 @@ class SignerCertificateController extends Controller
         return redirect()->route('admin.tte.signers.index')->with('success', 'Signer certificate dibuat.');
     }
 
-    public function deactivate(Request \, string \)
+    public function deactivate(Request $request, string $id)
     {
-        \ = SignerCertificate::query()->findOrFail(\);
-        \->keys->deactivate(\->id);
+        $cert = SignerCertificate::query()->findOrFail($id);
+        $this->keys->deactivate($cert->id);
 
-        \->audit->log(
+        $this->audit->log(
             'signer_certificate.deactivated',
-            \->id,
+            $cert->id,
             SignerCertificate::class,
-            ['code' => \->code],
-            \->user()->id,
-            \->ip(),
-            \->userAgent()
+            ['code' => $cert->code],
+            $request->user()->id,
+            $request->ip(),
+            $request->userAgent()
         );
 
         return back()->with('success', 'Signer certificate dinonaktifkan.');
