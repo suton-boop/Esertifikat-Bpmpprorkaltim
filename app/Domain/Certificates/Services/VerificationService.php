@@ -11,28 +11,27 @@ use Illuminate\Support\Facades\Storage;
 
 class VerificationService
 {
-    public function verifyRemote(string $token, string $secret): array
+    public function verifyRemote(string \, string \): array
     {
         try {
-            $payload = JWT::decode($token, new Key($secret, 'HS256'));
-            $certId = (int)$payload->sub;
+            \ = JWT::decode(\, new Key(\, 'HS256'));
+            \ = (int)\->sub;
 
-            $cert = Certificate::query()->with(['participant', 'event'])->findOrFail($certId);
-            $sig = DigitalSignature::query()->where('certificate_id', $cert->id)->firstOrFail();
-            $signer = SignerCertificate::query()->findOrFail($sig->signer_certificate_id);
+            \ = Certificate::query()->with(['participant', 'event'])->findOrFail(\);
+            \ = DigitalSignature::query()->where('certificate_id', \->id)->firstOrFail();
+            \ = SignerCertificate::query()->findOrFail(\->signer_certificate_id);
 
             return [
                 'success' => true,
-                'certificate' => $cert,
-                'signature' => $sig,
-                'signer' => $signer,
-                'signed_at' => $sig->signed_at,
+                'certificate' => \,
+                'signature' => \,
+                'signer' => \,
+                'signed_at' => \->signed_at,
             ];
-        }
-        catch (\Exception $e) {
+        } catch (\Exception \) {
             return [
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => \->getMessage(),
             ];
         }
     }
