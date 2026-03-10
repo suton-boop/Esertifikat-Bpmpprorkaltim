@@ -10,6 +10,10 @@
 
 <style>
 
+*, ::before, ::after {
+box-sizing: border-box;
+}
+
 body{
 background: linear-gradient(135deg,#eef4ff 0%,#f8fafc 60%,#e8f1ff 100%);
 font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
@@ -26,8 +30,8 @@ padding:40px 20px;
 .login-card{
 background:#ffffff;
 border-radius:28px;
-padding:50px 55px;
-max-width:700px;
+padding:40px 45px;
+max-width:480px;
 width:100%;
 box-shadow:
 0 30px 70px rgba(0,0,0,0.08),
