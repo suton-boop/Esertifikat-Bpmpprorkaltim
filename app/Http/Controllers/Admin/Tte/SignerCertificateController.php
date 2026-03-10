@@ -11,13 +11,13 @@ use Illuminate\Http\Request;
 class SignerCertificateController extends Controller
 {
     public function __construct(
-        private KeyManagerService \,
-        private AuditLogger \
+        private KeyManagerService $keys,
+        private AuditLogger $audit
     ) {}
 
     public function index()
     {
-        \ = SignerCertificate::query()->latest()->paginate(15);
+        $items = SignerCertificate::query()->latest()->paginate(15);
         return view('admin.tte.signers.index', compact('items'));
     }
 
