@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 namespace App\Http\Controllers\Admin\Tte;
 
@@ -11,13 +11,13 @@ use Illuminate\Http\Request;
 class SignerCertificateController extends Controller
 {
     public function __construct(
-        private KeyManagerService $keys,
-        private AuditLogger $audit
+        private KeyManagerService \,
+        private AuditLogger \
     ) {}
 
     public function index()
     {
-        $items = SignerCertificate::query()->latest()->paginate(15);
+        \ = SignerCertificate::query()->latest()->paginate(15);
         return view('admin.tte.signers.index', compact('items'));
     }
 
@@ -26,9 +26,9 @@ class SignerCertificateController extends Controller
         return view('admin.tte.signers.create');
     }
 
-    public function store(Request $request)
+    public function store(Request \)
     {
-        $data = $request->validate([
+        \ = \->validate([
             'code' => ['required','string','max:50','unique:signer_certificates,code'],
             'name' => ['required','string','max:150'],
             'public_key_pem' => ['required','string'],
@@ -38,42 +38,42 @@ class SignerCertificateController extends Controller
         ]);
 
         // SECURITY: jangan pernah log private_key_pem
-        $cert = $this->keys->createSignerCertificate(
-            code: $data['code'],
-            name: $data['name'],
-            publicKeyPem: $data['public_key_pem'],
-            privateKeyPem: $data['private_key_pem'],
-            createdBy: $request->user()->id,
-            validFrom: $data['valid_from'] ?? null,
-            validTo: $data['valid_to'] ?? null,
+        \ = \->keys->createSignerCertificate(
+            code: \['code'],
+            name: \['name'],
+            publicKeyPem: \['public_key_pem'],
+            privateKeyPem: \['private_key_pem'],
+            createdBy: \->user()->id,
+            validFrom: \['valid_from'] ?? null,
+            validTo: \['valid_to'] ?? null,
         );
 
-        $this->audit->log(
+        \->audit->log(
             'signer_certificate.created',
-            $cert->id,
+            \->id,
             SignerCertificate::class,
-            ['code' => $cert->code, 'name' => $cert->name],
-            $request->user()->id,
-            $request->ip(),
-            $request->userAgent()
+            ['code' => \->code, 'name' => \->name],
+            \->user()->id,
+            \->ip(),
+            \->userAgent()
         );
 
         return redirect()->route('admin.tte.signers.index')->with('success', 'Signer certificate dibuat.');
     }
 
-    public function deactivate(Request $request, string $id)
+    public function deactivate(Request \, string \)
     {
-        $cert = SignerCertificate::query()->findOrFail($id);
-        $this->keys->deactivate($cert->id);
+        \ = SignerCertificate::query()->findOrFail(\);
+        \->keys->deactivate(\->id);
 
-        $this->audit->log(
+        \->audit->log(
             'signer_certificate.deactivated',
-            $cert->id,
+            \->id,
             SignerCertificate::class,
-            ['code' => $cert->code],
-            $request->user()->id,
-            $request->ip(),
-            $request->userAgent()
+            ['code' => \->code],
+            \->user()->id,
+            \->ip(),
+            \->userAgent()
         );
 
         return back()->with('success', 'Signer certificate dinonaktifkan.');
