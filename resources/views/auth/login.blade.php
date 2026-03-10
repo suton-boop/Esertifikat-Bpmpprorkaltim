@@ -39,7 +39,9 @@ box-shadow:
 }
 
 .logo-top{
-height:130px;
+height:90px;
+width: auto;
+max-width: 100%;
 object-fit:contain;
 margin-bottom:20px;
 display: block;
