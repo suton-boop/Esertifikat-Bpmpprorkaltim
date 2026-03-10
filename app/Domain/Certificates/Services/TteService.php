@@ -5,7 +5,7 @@ namespace App\Domain\Certificates\Services;
 use App\Domain\Certificates\DTO\SignResult;
 use App\Domain\Certificates\Models\Certificate;
 use App\Domain\Certificates\Models\DigitalSignature;
-use App\Domain\Certificates\Models\SignerCertificate;
+use App\Models\SignerCertificate;
 use Firebase\JWT\JWT;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -15,10 +15,12 @@ use setasign\Fpdi\Tcpdf\Fpdi;
 
 class TteService
 {
-    public function __construct(
-        private KeyManagerService $keys,
-        private AuditLogger $audit
-    ) {}
+    public function __construct(private
+        KeyManagerService $keys, private
+        AuditLogger $audit
+        )
+    {
+    }
 
     public function signCertificate(
         Certificate $certificate,
@@ -26,7 +28,8 @@ class TteService
         int $signedBy,
         ?string $ip,
         ?string $userAgent
-    ): DigitalSignature {
+        ): DigitalSignature
+    {
         if (!$certificate->isReadyForSigning()) {
             throw new \RuntimeException('Certificate not ready for signing.');
         }
@@ -48,7 +51,7 @@ class TteService
 
             $publicToken = Str::random(64); // token publik (bukan JWT)
 
-            $tsaEnabled = (bool) config('tte.tsa.enabled');
+            $tsaEnabled = (bool)config('tte.tsa.enabled');
             $tsaNonce = null;
             $tsaSigB64 = null;
             $tsaAt = null;
@@ -69,14 +72,14 @@ class TteService
             ]);
 
             $sig = DigitalSignature::query()->create([
-                'id' => (string) Str::uuid(),
+                'id' => (string)Str::uuid(),
                 'certificate_id' => $certificate->id,
                 'signer_certificate_id' => $signerCert->id,
                 'document_hash' => $hashHex,
                 'signature_base64' => $signatureBase64,
                 'signature_algo' => 'RSA-SHA256',
                 'tsa_enabled' => $tsaEnabled,
-                'tsa_at' => $tsaAt ? \Illuminate\Support\Carbon::instance(\DateTimeImmutable::createFromInterface($tsaAt)) : null,
+                'tsa_at' => $tsaAt ?\Illuminate\Support\Carbon::instance(\DateTimeImmutable::createFromInterface($tsaAt)) : null,
                 'tsa_nonce' => $tsaNonce,
                 'tsa_signature_base64' => $tsaSigB64,
                 'tsa_signer_code' => $tsaEnabled ? config('tte.tsa.signer_certificate_code') : null,
@@ -90,13 +93,13 @@ class TteService
             $this->audit->log(
                 'certificate.signed',
                 $certificate->id,
-                Certificate::class,
-                [
-                    'document_hash' => $hashHex,
-                    'signer_cert_code' => $signerCert->code,
-                    'public_token' => $publicToken,
-                    'tsa_enabled' => $tsaEnabled,
-                ],
+                Certificate::class ,
+            [
+                'document_hash' => $hashHex,
+                'signer_cert_code' => $signerCert->code,
+                'public_token' => $publicToken,
+                'tsa_enabled' => $tsaEnabled,
+            ],
                 $signedBy,
                 $ip,
                 $userAgent
@@ -112,7 +115,7 @@ class TteService
         $payload = [
             'iss' => config('tte.qr.issuer'),
             'iat' => $now,
-            'exp' => $now + (int) config('tte.qr.jwt_ttl_seconds'),
+            'exp' => $now + (int)config('tte.qr.jwt_ttl_seconds'),
             'jti' => Str::uuid()->toString(),
             'pt' => $publicToken,
             'cid' => $certificateId,
@@ -133,7 +136,7 @@ class TteService
         $qrJwt = $this->makeQrJwt($publicToken, $certificate->id);
         $verifyUrl = \URL::signedRoute(
             config('tte.qr.verify_route_name'),
-            ['token' => $publicToken, 'jwt' => $qrJwt],
+        ['token' => $publicToken, 'jwt' => $qrJwt],
             now()->addMinutes(config('tte.security.signed_url_ttl_minutes'))
         );
 
