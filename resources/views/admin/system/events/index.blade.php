@@ -13,7 +13,7 @@
     <div class="text-muted">Kelola daftar event untuk e-sertifikat.</div>
   </div>
 
-  @if(auth()->user()->role?->name !== 'operator')
+  @if(!in_array(strtolower(auth()->user()->role?->name ?? ''), ['operator']))
   <a href="{{ route('admin.system.events.create') }}" class="btn btn-primary rounded-3">
     <i class="fa-solid fa-plus me-1"></i> Tambah Event
   </a>
@@ -82,7 +82,7 @@
           <th>Lokasi</th>
           <th width="10%" class="text-center">Peserta</th>
           <th width="10%">Status</th>
-          @if(auth()->user()->role?->name !== 'operator')
+          @if(!in_array(strtolower(auth()->user()->role?->name ?? ''), ['operator']))
           <th width="12%">Aksi</th>
           @endif
         </tr>
@@ -142,10 +142,10 @@
               <span class="badge {{ $badge }}">{{ $label }}</span>
             </td>
 
-            @if(auth()->user()->role?->name !== 'operator')
+            @if(!in_array(strtolower(auth()->user()->role?->name ?? ''), ['operator']))
             <td>
               <div class="d-flex gap-2">
-                @if(in_array(auth()->user()->role?->name, ['admin', 'superadmin']))
+                @if(in_array(strtolower(auth()->user()->role?->name ?? ''), ['admin', 'superadmin', 'super admin', 'admin_sistem']))
                 <a
                   href="{{ route('admin.system.events.downloadSigned', $e->id) }}"
                   class="btn btn-success btn-sm rounded-3"

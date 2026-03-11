@@ -76,7 +76,7 @@
     <div class="d-flex align-items-center gap-3">
         <div class="text-muted small">Total: {{ $certificates?->total() ?? 0 }}</div>
         
-        @if(!empty($eventId) && in_array(auth()->user()->role?->name, ['admin', 'superadmin']))
+        @if(!empty($eventId) && in_array(strtolower(auth()->user()->role?->name ?? ''), ['admin', 'superadmin', 'super admin', 'admin_sistem']))
             <a href="{{ route('admin.system.events.downloadSigned', $eventId) }}" class="btn btn-sm btn-primary fw-medium">
                 <i class="fa-solid fa-file-pdf me-1"></i> Download Semua PDF TTE
             </a>
