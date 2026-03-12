@@ -24,7 +24,7 @@ class SigningController extends Controller
         $signers = SignerCertificate::query()->where('is_active', true)->orderBy('name')->get(['id', 'code', 'name']);
 
         $query = Certificate::query()->with(['event:id,name', 'participant:id,name'])
-            ->whereIn('status', ['approved', 'final_generated', 'gagal_tte', 'Gagal_tte', 'scheduled']);
+            ->whereIn('status', ['approved', 'final_generated', 'gagal_tte', 'Gagal_tte']);
         if (!empty($eventId) && is_numeric($eventId)) {
             $query->where('event_id', (int)$eventId);
         }
@@ -37,7 +37,7 @@ class SigningController extends Controller
             });
         }
 
-        $certificates = $query->orderByDesc('updated_at')->paginate(20)->withQueryString();
+        $certificates = $query->orderByDesc('updated_at')->paginate(50)->withQueryString();
         return view('admin.tte.signing.index', compact('q', 'eventId', 'events', 'signers', 'certificates'));
     }
 
