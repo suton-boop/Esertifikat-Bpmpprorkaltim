@@ -116,6 +116,9 @@
          <button type="button" class="btn btn-outline-primary btn-sm mt-2" id="btnAddPlacement">
              <i class="fa-solid fa-plus me-1"></i> Tambah Lokasi Sign (Halaman Lain)
          </button>
+         <button type="button" class="btn btn-outline-secondary btn-sm mt-2 ms-2" id="btnResetPlacement" title="Kembalikan ke pengaturan awal (1 halaman)">
+             <i class="fa-solid fa-rotate-left me-1"></i> Reset Lokasi
+         </button>
       </div>
     </div>
   </div>
@@ -310,26 +313,121 @@ document.addEventListener('DOMContentLoaded', () => {
         return true;
     };
 
-    // Add another placement row
-    document.getElementById('btnAddPlacement').addEventListener('click', () => {
+    // --- PERSISTENCE LOGIC START ---
+    const STORAGE_KEY = 'tte_placements_config';
+
+    const savePlacements = () => {
+        const placements = [];
+        document.querySelectorAll('.placement-row').forEach(row => {
+            placements.push({
+                page: row.querySelector('.placement-page').value,
+                x: row.querySelector('.placement-x').value,
+                y: row.querySelector('.placement-y').value,
+                w: row.querySelector('.placement-w').value,
+                h: row.querySelector('.placement-h').value,
+                barcode: row.querySelector('.placement-barcode').checked,
+                tte: row.querySelector('.placement-tte').checked
+            });
+        });
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(placements));
+    };
+
+    const loadPlacements = () => {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (!saved) return;
+        
+        const placements = JSON.parse(saved);
+        if (placements.length === 0) return;
+
         const container = document.getElementById('placementContainer');
-        const firstRow = container.querySelector('.placement-row');
-        const newRow = firstRow.cloneNode(true);
+        container.innerHTML = ''; // Clear defaults
+
+        placements.forEach((data, index) => {
+            addPlacementRow(data);
+        });
+    };
+
+    const addPlacementRow = (data = null) => {
+        const container = document.getElementById('placementContainer');
+        const template = `
+             <div class="placement-row d-flex align-items-center gap-2 mb-2 flex-wrap bg-light p-2 rounded-3 border">
+                <div class="input-group input-group-sm shadow-sm" style="width: 85px;">
+                  <span class="input-group-text bg-white border-0">Hal</span>
+                  <input type="number" class="form-control border-light placement-page" value="${data ? data.page : 1}" min="1">
+                </div>
+                <div class="input-group input-group-sm shadow-sm" style="width: 75px;">
+                  <input type="number" class="form-control border-light placement-x" value="${data ? data.x : 20}">
+                </div>
+                <div class="input-group input-group-sm shadow-sm" style="width: 75px;">
+                  <input type="number" class="form-control border-light placement-y" value="${data ? data.y : 160}">
+                </div>
+                <div class="input-group input-group-sm shadow-sm" style="width: 85px;">
+                  <span class="input-group-text bg-white border-0">W</span>
+                  <input type="number" class="form-control border-light placement-w" value="${data ? data.w : 35}">
+                </div>
+                <div class="input-group input-group-sm shadow-sm" style="width: 85px;">
+                  <span class="input-group-text bg-white border-0">H</span>
+                  <input type="number" class="form-control border-light placement-h" value="${data ? data.h : 35}">
+                </div>
+                <div class="form-check form-switch ms-2">
+                  <input class="form-check-input placement-barcode" type="checkbox" ${(!data || data.barcode) ? 'checked' : ''}>
+                  <label class="form-check-label x-small">QR</label>
+                </div>
+                <div class="form-check form-switch ms-1">
+                  <input class="form-check-input placement-tte" type="checkbox" ${(!data || data.tte) ? 'checked' : ''}>
+                  <label class="form-check-label x-small">Teks</label>
+                </div>
+                ${container.children.length >= 0 ? '<button type="button" class="btn btn-outline-danger btn-sm border-0 btnDeletePlacement"><i class="fa-solid fa-trash"></i></button>' : ''}
+             </div>`;
         
-        // Reset values for better UX (e.g. assume page 2 if adding second row)
-        const rows = container.querySelectorAll('.placement-row');
-        newRow.querySelector('.placement-page').value = rows.length + 1;
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = template.trim();
+        const row = tempDiv.firstChild;
         
-        // Add delete button
-        const delBtn = document.createElement('button');
-        delBtn.type = 'button';
-        delBtn.className = 'btn btn-outline-danger btn-sm px-2 border-0';
-        delBtn.innerHTML = '<i class="fa-solid fa-trash"></i>';
-        delBtn.onclick = () => newRow.remove();
-        newRow.appendChild(delBtn);
+        // Event listener for changes
+        row.querySelectorAll('input').forEach(input => {
+            input.addEventListener('change', savePlacements);
+        });
         
-        container.appendChild(newRow);
+        // Delete functionality
+        const delBtn = row.querySelector('.btnDeletePlacement');
+        if(delBtn) {
+            delBtn.onclick = () => {
+                if(container.children.length > 1) {
+                    row.remove();
+                    savePlacements();
+                } else {
+                    alert('Minimal harus ada 1 lokasi tanda tangan.');
+                }
+            };
+        }
+
+        container.appendChild(row);
+    };
+
+    // Initialize listeners
+    document.getElementById('btnAddPlacement').addEventListener('click', () => {
+        const rows = document.querySelectorAll('.placement-row');
+        addPlacementRow({
+            page: rows.length + 1,
+            x: 20, y: 160, w: 35, h: 35, barcode: true, tte: true
+        });
+        savePlacements();
     });
+
+    document.getElementById('btnResetPlacement').addEventListener('click', () => {
+        if(confirm('Reset lokasi ke pengaturan awal (1 halaman default)?')) {
+            localStorage.removeItem(STORAGE_KEY);
+            location.reload();
+        }
+    });
+
+    // Load saved config on startup
+    loadPlacements();
+    if(document.querySelectorAll('.placement-row').length === 0) {
+        addPlacementRow(); // Add initial default if nothing saved
+    }
+    // --- PERSISTENCE LOGIC END ---
 
     // Single Button Dispatch Request Linker
     document.querySelectorAll('.btnSingleDispatch').forEach(btn => {
