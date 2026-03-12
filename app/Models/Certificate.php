@@ -12,6 +12,7 @@ class Certificate extends Model
     public const STATUS_SUBMITTED = 'submitted';
     public const STATUS_APPROVED = 'approved';
     public const STATUS_REJECTED = 'rejected';
+    public const STATUS_GENERATING = 'generating';
     public const STATUS_FINAL_GENERATED = 'final_generated';
     public const STATUS_SCHEDULED = 'scheduled';
     public const STATUS_SIGNED = 'signed';

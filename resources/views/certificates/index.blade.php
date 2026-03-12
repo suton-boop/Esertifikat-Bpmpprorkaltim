@@ -107,6 +107,7 @@
           <option value="draft" @selected($status === 'draft')>Draft</option>
           <option value="submitted" @selected($status === 'submitted')>Submitted</option>
           <option value="approved" @selected($status === 'approved')>Approved</option>
+          <option value="generating" @selected($status === 'generating')>Generating</option>
           <option value="final_generated" @selected($status === 'final_generated')>Final Generated</option>
           <option value="signed" @selected($status === 'signed')>Signed</option>
           <option value="rejected" @selected($status === 'rejected')>Rejected</option>
@@ -185,13 +186,14 @@
               \App\Models\Certificate::STATUS_DRAFT => 'bg-warning text-dark',
               \App\Models\Certificate::STATUS_SUBMITTED => 'bg-info text-dark',
               \App\Models\Certificate::STATUS_APPROVED => 'bg-primary',
+              \App\Models\Certificate::STATUS_GENERATING => 'bg-info bg-gradient',
               \App\Models\Certificate::STATUS_FINAL_GENERATED => 'bg-success',
               \App\Models\Certificate::STATUS_SIGNED => 'bg-success',
               \App\Models\Certificate::STATUS_REJECTED => 'bg-danger',
               'gagal_tte' => 'bg-danger',
               default => 'bg-secondary'
             };
-          @endphp
+@endphp
 
           <tr>
             <td>{{ ($participants->currentPage()-1)*$participants->perPage() + $loop->iteration }}</td>
@@ -208,7 +210,12 @@
 
             <td>
               @if($hasCert)
-                <span class="badge {{ $badgeClass }}">{{ ucfirst($statusVal) }}</span>
+                <span class="badge {{ $badgeClass }}">
+                  @if($statusVal === \App\Models\Certificate::STATUS_GENERATING)
+                    <i class="fa-solid fa-spinner fa-spin me-1"></i>
+                  @endif
+                  {{ ucfirst(str_replace('_', ' ', $statusVal)) }}
+                </span>
                 <div class="text-muted small mt-1">
                   {{ $cert->certificate_number ?? $cert->certificate_no ?? $cert->certificate_no ?? '-' }}
                 </div>

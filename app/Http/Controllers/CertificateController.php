@@ -301,6 +301,7 @@ class CertificateController extends Controller
                 return back()->with('error', 'Nomor sertifikat belum dikunci. Approve dulu.');
             }
 
+            $certificate->update(['status' => Certificate::STATUS_GENERATING]);
             GenerateCertificatePdfJob::dispatch($certificate);
 
             return back()->with('success', 'Perintah pembuatan PDF Certificate telah dimasukkan ke dalam antrean (Queue). Silakan refresh halaman beberapa saat lagi.');
@@ -341,6 +342,7 @@ class CertificateController extends Controller
                 continue;
             }
 
+            $c->update(['status' => Certificate::STATUS_GENERATING]);
             GenerateCertificatePdfJob::dispatch($c);
             $dispatched++;
         }
