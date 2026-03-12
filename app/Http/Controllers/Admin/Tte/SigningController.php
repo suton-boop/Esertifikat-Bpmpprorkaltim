@@ -148,6 +148,7 @@ class SigningController extends Controller
         }
 
         // Jika sudah masuk waktunya, langsung proses
+        $cert->update(['status' => 'proses_tte']); // Update status segera agar hilang dari list
         dispatch($job->onQueue('tte-signing'));
         return back()->with('success', 'Dispatch sign sukses (1 data).');
     }
@@ -247,6 +248,7 @@ class SigningController extends Controller
                 }
             }
 
+            $c->update(['status' => 'proses_tte']); // Update status segera agar hilang dari list
             dispatch($job->onQueue('tte-signing'));
             $countSuccess++;
         }
