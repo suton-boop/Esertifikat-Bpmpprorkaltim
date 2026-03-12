@@ -25,7 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withSchedule(function ($schedule) {
-        $schedule->command('queue:work --stop-when-empty')->everyMinute();
+        $schedule->command('queue:work --queue=tte-signing,default --stop-when-empty')->everyMinute();
     })
     ->create();
 

@@ -200,6 +200,27 @@ Route::prefix('admin')
         Route::get('/monitoring', [MonitoringController::class , 'index'])->name('monitoring.index');
         Route::post('/monitoring/retry-failed', [MonitoringController::class , 'retryAllFailed'])->name('monitoring.retryFailed');
         Route::post('/monitoring/clear-failed', [MonitoringController::class , 'clearAllFailed'])->name('monitoring.clearFailed');
+
+        // Troubleshooting Routes
+        Route::get('/monitoring/process-queue', function() {
+            try {
+                $output = '';
+                \Illuminate\Support\Facades\Artisan::call('queue:work', [
+                    '--queue' => 'tte-signing,default',
+                    '--stop-when-empty' => true,
+                    '--tries' => 1
+                ]);
+                $output = \Illuminate\Support\Facades\Artisan::output();
+                return "Queue process finished. Output: <pre>" . $output . "</pre>";
+            } catch (\Exception $e) {
+                return "Error: " . $e->getMessage();
+            }
+        })->name('monitoring.processQueue');
+
+        Route::get('/monitoring/clear-cache', function() {
+            \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+            return "Cache cleared successfully.";
+        })->name('monitoring.clearCache');
         Route::get('/audit', [AuditController::class , 'index'])->name('audit.index');
         Route::get('/visitors', [VisitorController::class , 'index'])->name('visitors.index');
     });
